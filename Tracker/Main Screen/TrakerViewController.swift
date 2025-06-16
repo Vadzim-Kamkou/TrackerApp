@@ -51,7 +51,7 @@ class TrackerViewController: UIViewController {
         view.addSubview(noTrackerImageView)
         NSLayoutConstraint.activate([
             noTrackerImageView.centerXAnchor.constraint(equalTo: super.view.centerXAnchor),
-            noTrackerImageView.centerXAnchor.constraint(equalTo: super.view.centerXAnchor)
+            noTrackerImageView.centerYAnchor.constraint(equalTo: super.view.centerYAnchor)
         ])
         self.trackerView = noTrackerImageView
         
