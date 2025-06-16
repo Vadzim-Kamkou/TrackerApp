@@ -28,7 +28,7 @@ class TrackerViewController: UIViewController {
         trackerTitleLabel.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(trackerTitleLabel)
         NSLayoutConstraint.activate([
-            trackerTitleLabel.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 24)
+            trackerTitleLabel.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 24),
             trackerTitleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 0)
         ])
         self.trackerTitleLabel = trackerTitleLabel
