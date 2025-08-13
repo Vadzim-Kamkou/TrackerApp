@@ -2,16 +2,8 @@ import UIKit
 
 final class TabBarController: UITabBarController {
 
-    
-
-    
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-    
-//        let navigationVC = UINavigationController(rootViewController: trackerVC)
-////        navigationVC.modalPresentationStyle = .fullScreen
-//        navigationVC.navigationBar.barTintColor = .black
-//        self.present(navigationVC, animated: true)
     }
     
     

@@ -10,12 +10,10 @@ class SplashViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-        guard let window = UIApplication.shared.windows.first else { fatalError("Invalid Configuration") }
-        let tabBarController = TabBarController()
-        window.rootViewController = tabBarController
-  
+        guard let window = view.window else { fatalError("Invalid Configuration") }
+           let tabBarController = TabBarController()
+           window.rootViewController = tabBarController
     }
-    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -24,7 +22,7 @@ class SplashViewController: UIViewController {
 
     // MARK: Private functions
     private func configSplashView() {
-        print("main test")
+        print("configSplashView")
         
         view.backgroundColor = UIColor.appBlue
         
