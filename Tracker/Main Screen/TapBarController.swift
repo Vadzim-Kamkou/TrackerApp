@@ -6,8 +6,6 @@ final class TabBarController: UITabBarController {
         super.viewDidAppear(animated)
     }
     
-    
-    
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -17,7 +15,7 @@ final class TabBarController: UITabBarController {
         
         let attributes: [NSAttributedString.Key: Any] = [
             .font: UIFont(name: "YSDisplay-Medium", size: 10) ?? UIFont.systemFont(ofSize: 10),
-            .foregroundColor: UIColor.black // Цвет текста
+            .foregroundColor: UIColor.black
         ]
     
         trackerVC.tabBarItem = UITabBarItem(
@@ -37,6 +35,3 @@ final class TabBarController: UITabBarController {
        self.viewControllers = [trackerNav, statisticsVC]
     }
 }
-
-//YSDisplay-Medium
-//YSDisplay-Bold

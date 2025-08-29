@@ -1,19 +1,11 @@
-//
-//  TrackerCreation.swift
-//  Tracker
-//
-//  Created by Vadzim on 16.07.25.
-//
-
 import UIKit
 
 protocol CategoryViewControllerDelegate: AnyObject {
     func didSelectCategory(_ category: TrackerCategory)
 }
 
-class TrackerCreationViewController: UIViewController {
+final class TrackerCreationViewController: UIViewController {
     
-    weak var categoryDelegate: CategoryViewControllerDelegate?
     var categories: [TrackerCategory] = []
     private var chosenCategoryTitle: String?
     private var categorySubtitleLabel: UILabel?
@@ -133,6 +125,7 @@ class TrackerCreationViewController: UIViewController {
     }()
     
     private var selectedDaysString: String = ""
+    private var selectedDays: Set<Int> = []
     
     private lazy var separatorView: UIView = {
         let view = UIView()
@@ -179,21 +172,30 @@ class TrackerCreationViewController: UIViewController {
         return vc
     }()
     
+    private let trackerColors: [UIColor] = [
+        .systemRed,
+        .systemOrange,
+        .systemYellow,
+        .systemGreen,
+        .systemBlue,
+        .systemPurple,
+        .systemPink,
+        .systemTeal,
+        .systemIndigo,
+        .systemBrown
+    ]
     
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
         setupNavigationBar()
         
-        // Добавляем обработчик касания для скрытия клавиатуры
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
         view.addGestureRecognizer(tapGesture)
         
-        // Убеждаемся, что все элементы не блокируют касания
         view.isUserInteractionEnabled = true
         trackerCreateTextView.isUserInteractionEnabled = true
         
-        // Проверяем, что кнопки не перехватывают касания
         buttonStackView.isUserInteractionEnabled = true
         trackerCreationCancelButton.isUserInteractionEnabled = true
         trackerCreationCreateButton.isUserInteractionEnabled = true
@@ -233,7 +235,7 @@ class TrackerCreationViewController: UIViewController {
         label.translatesAutoresizingMaskIntoConstraints = false
         
         let daysLabel = UILabel()
-        daysLabel.text = selectedDaysString // Используем актуальные данные
+        daysLabel.text = selectedDaysString
         daysLabel.font = UIFont(name: "YSDisplay-Medium", size: 17) ?? UIFont.systemFont(ofSize: 17)
         daysLabel.textColor = .appGray
         daysLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -306,13 +308,45 @@ class TrackerCreationViewController: UIViewController {
         tableView.reloadSections(IndexSet(integer: 2), with: .none)
     }
     
+    private func getRandomColor() -> UIColor {
+        return trackerColors.randomElement() ?? .systemBlue
+    }
+    
     @objc private func trackerCreationCancelButtonTapped() {
-        print("Кнопка отмены нажата")
         dismiss(animated: true)
     }
     
     @objc private func trackerCreationCreateButtonTapped() {
-        print("Кнопка отмены нажата")
+        guard let trackerName = trackerCreateTextView.text,
+              trackerName != trackerCreateTextViewDefaultText,
+              !trackerName.isEmpty,
+              let categoryTitle = chosenCategoryTitle,
+              !selectedDaysString.isEmpty else {
+            return
+        }
+        
+        let newTracker = Tracker(
+            name: trackerName,
+            color: getRandomColor(),
+            emoji: "😊",
+            schedule: Array(selectedDays)
+        )
+        
+        let newCategories = categories.map { category in
+            if category.title == categoryTitle {
+                let newTrackers = category.trackers + [newTracker]
+                return TrackerCategory(title: categoryTitle, trackers: newTrackers)
+            } else {
+                return category
+            }
+        }
+        
+        categories = newCategories
+        
+        if let updatedCategory = newCategories.first(where: { $0.title == categoryTitle }) {
+            NotificationCenter.default.post(name: .categoryAdded, object: updatedCategory)
+        }
+        
         dismiss(animated: true)
     }
     
@@ -546,7 +580,6 @@ extension TrackerCreationViewController: UITextViewDelegate {
     }
     
     func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
-        // Если нажата клавиша Return
         if text == "\n" {
             textView.resignFirstResponder()
             return false
@@ -557,6 +590,7 @@ extension TrackerCreationViewController: UITextViewDelegate {
 
 extension TrackerCreationViewController: ScheduleViewControllerDelegate {
     func didSelectDays(_ days: Set<Int>, daysString: String) {
+        selectedDays = days
         updateScheduleDisplay(daysString)
         setupTrackerCreationCreateButtonUI()
     }
@@ -572,6 +606,5 @@ extension TrackerCreationViewController: CategoryViewControllerDelegate {
         }
         dismiss(animated: true)
         setupTrackerCreationCreateButtonUI()
-        
     }
 }

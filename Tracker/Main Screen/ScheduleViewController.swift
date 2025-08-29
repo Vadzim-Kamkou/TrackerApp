@@ -3,7 +3,8 @@ import UIKit
 protocol ScheduleViewControllerDelegate: AnyObject {
     func didSelectDays(_ days: Set<Int>, daysString: String)
 }
-class ScheduleViewController: UIViewController {
+
+final class ScheduleViewController: UIViewController {
     
     weak var delegate: ScheduleViewControllerDelegate?
     

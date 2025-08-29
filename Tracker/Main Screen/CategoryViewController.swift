@@ -1,21 +1,13 @@
-//
-//  CategoryViewController.swift
-//  Tracker
-//
-//  Created by Vadzim on 23.07.25.
-//
-
 import UIKit
 
 
-class CategoryViewController: UIViewController {
+final class CategoryViewController: UIViewController {
     
     weak var delegate: CategoryViewControllerDelegate?
     var categories: [TrackerCategory] = []
     private var selectedIndex: Int?
     var preselectedTitle: String?
     
-    // таблица-контейнер для UIView категорий со скроллом
     private lazy var tableView: UITableView = {
         let tv = UITableView(frame: .zero, style: .plain)
         tv.backgroundColor = .clear
@@ -27,7 +19,6 @@ class CategoryViewController: UIViewController {
         return tv
     }()
 
-    // UIView для состояния, когда нет категорий
     private lazy var emptyStateView: UIView = {
         let view = UIView()
         view.backgroundColor = .clear
@@ -57,7 +48,6 @@ class CategoryViewController: UIViewController {
         return view
     }()
     
-    // кнопка создания категорий
     private lazy var addCategoryButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Добавить категорию", for: .normal)
@@ -69,7 +59,6 @@ class CategoryViewController: UIViewController {
         return button
     }()
     
-    // загружаем экран
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
@@ -136,7 +125,6 @@ class CategoryViewController: UIViewController {
         }
     }
     
-    // кнопка создания новой категории
     @objc private func addCategoryTapped() {
         let categoryNewVC = CategoryNewViewController()
         categoryNewVC.delegate = self
@@ -145,7 +133,6 @@ class CategoryViewController: UIViewController {
         
     }
     
-    // если категория была нажата - закрываем экран и передаем выбранную категорию.
     @objc private func categoryRowTapped(_ gr: UITapGestureRecognizer) {
         guard let row = gr.view else { return }
         selectedIndex = row.tag
@@ -154,7 +141,6 @@ class CategoryViewController: UIViewController {
         delegate?.didSelectCategory(chosen)
         dismiss(animated: true)
     }
-    
 }
 
 // MARK: - CategoryNewViewControllerDelegate
@@ -172,7 +158,6 @@ extension CategoryViewController: CategoryNewViewControllerDelegate {
   
     }
 }
-
 
 // MARK: - UITableViewDataSource
 extension CategoryViewController: UITableViewDataSource {
@@ -222,7 +207,6 @@ extension CategoryViewController: UITableViewDataSource {
                 row.topAnchor.constraint(equalTo: parent.topAnchor).isActive = true
             }
             
-            // cепаратор
             if idx < categories.count - 1 {
                 let sep = UIView()
                 sep.backgroundColor = .systemGray4

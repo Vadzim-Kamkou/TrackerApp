@@ -1,19 +1,12 @@
-//
-//  CategoryNewViewController.swift
-//  Tracker
-//
-//  Created by Vadzim on 25.07.25.
-//
 import UIKit
 
 protocol CategoryNewViewControllerDelegate: AnyObject {
     func didCreateCategory(_ category: TrackerCategory)
 }
 
-class CategoryNewViewController: UIViewController {
+final class CategoryNewViewController: UIViewController {
     
     weak var delegate: CategoryNewViewControllerDelegate?
-    
     
     private lazy var categoryTextField: UITextField = {
         let textField = UITextField()

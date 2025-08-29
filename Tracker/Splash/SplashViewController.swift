@@ -22,7 +22,7 @@ class SplashViewController: UIViewController {
 
     // MARK: Private functions
     private func configSplashView() {
-        print("configSplashView")
+        print("SplashView")
         
         view.backgroundColor = UIColor.appBlue
         

@@ -1,21 +1,14 @@
-//
-//  Tracker.swift
-//  Tracker
-//
-//  Created by Vadzim on 15.07.25.
-//
-
 import UIKit
 
 struct Tracker {
-    let id: String?
-    let name: String?
+    let id: UUID
+    let name: String
     let color: UIColor
-    let emoji: String?
+    let emoji: String
     let schedule: [Int]?
     
     init(
-        id: String,
+        id: UUID = UUID(),
         name: String,
         color: UIColor,
         emoji: String,
