@@ -454,10 +454,16 @@ final class TrackerCreationViewController: UIViewController {
     }
     
     @objc private func scheduleTapped() {
+       
+        trackerCreateTextView.resignFirstResponder()
+        
         let navigationController = UINavigationController(rootViewController: scheduleViewController)
         present(navigationController, animated: true)
     }
     @objc private func categoryTapped() {
+        
+        trackerCreateTextView.resignFirstResponder()
+        
         let categoryVC = CategoryViewController()
         categoryVC.delegate = self
         categoryVC.categories       = self.categories
