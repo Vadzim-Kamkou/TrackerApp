@@ -6,11 +6,7 @@ protocol CategoryViewControllerDelegate: AnyObject {
 
 final class TrackerCreationViewController: UIViewController {
     
-    var categories: [TrackerCategory] = []
-    private var chosenCategoryTitle: String?
-    private var categorySubtitleLabel: UILabel?
-    
-    
+    // MARK: - Main Table
     private lazy var tableView: UITableView = {
         let tableView = UITableView(frame: .zero, style: .grouped)
         tableView.delegate = self
@@ -21,6 +17,7 @@ final class TrackerCreationViewController: UIViewController {
         return tableView
     }()
     
+    // MARK: - Tracker Name
     private let trackerCreateTextViewMaxCharacters = 38
     private var isOverLimitTextView = false
     private let trackerCreateTextViewDefaultText = "Введите название трекера"
@@ -53,6 +50,12 @@ final class TrackerCreationViewController: UIViewController {
         button.isHidden = true
         return button
     }()
+    
+    
+    // MARK: - Tracker Settings
+    var categories: [TrackerCategory] = []
+    private var chosenCategoryTitle: String?
+    private var categorySubtitleLabel: UILabel?
     
     private lazy var trackerSettingsListView: UIView = {
         let view = UIView()
@@ -134,6 +137,72 @@ final class TrackerCreationViewController: UIViewController {
         return view
     }()
     
+    private lazy var scheduleViewController: ScheduleViewController = {
+        let vc = ScheduleViewController()
+        vc.delegate = self
+        return vc
+    }()
+    
+    // MARK: - Emoji Collection
+    private var selectedEmoji: String = "😊"
+    private let emojis: [String] = [
+        "😊", "😻", "🌺", "🐶", "❤️", "😱",
+        "😇", "😡", "🥶", "🤔", "🙌", "🍔",
+        "🥦", "🏓", "🥇", "🎸", "🏝", "😪"
+    ]
+    
+    private lazy var emojiHeaderLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Emoji"
+        label.font = Fonts.ysDisplayBold19 ?? UIFont.boldSystemFont(ofSize: 19)
+        label.textColor = .appBlack
+        label.textAlignment = .left
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    private lazy var emojiCollectionView: UICollectionView = {
+        let layout = UICollectionViewFlowLayout()
+        layout.itemSize = CGSize(width: 52, height: 52)
+        
+        let screenWidth = UIScreen.main.bounds.width
+        let totalCellWidth: CGFloat = 52 * 6 // 6 ячеек по 52pt
+        let totalSpacing: CGFloat = 5 * 5 // 5 промежутков между ячейками по 5pt
+        let availableWidth = screenWidth - 32 // отступы по краям экрана (16 + 16)
+        let sideInset = (availableWidth - totalCellWidth - totalSpacing) / 2
+        
+        layout.minimumInteritemSpacing = 5
+        layout.minimumLineSpacing = 0
+        layout.sectionInset = UIEdgeInsets(top: 24, left: sideInset, bottom: 24, right: sideInset)
+        
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.backgroundColor = .white
+        collectionView.dataSource = self
+        collectionView.register(EmojiCollectionViewCell.self, forCellWithReuseIdentifier: EmojiCollectionViewCell.identifier)
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
+        collectionView.isScrollEnabled = false
+        
+        collectionView.isUserInteractionEnabled = true
+        collectionView.allowsSelection = true
+        
+        return collectionView
+    }()
+    
+    // MARK: - Color Collection
+    private let trackerColors: [UIColor] = [
+        .systemRed,
+        .systemOrange,
+        .systemYellow,
+        .systemGreen,
+        .systemBlue,
+        .systemPurple,
+        .systemPink,
+        .systemTeal,
+        .systemIndigo,
+        .systemBrown
+    ]
+    
+    // MARK: - Buttons
     private lazy var buttonStackView: UIStackView = {
         let stackView = UIStackView()
         stackView.axis = .horizontal
@@ -166,24 +235,8 @@ final class TrackerCreationViewController: UIViewController {
         return button
     }()
     
-    private lazy var scheduleViewController: ScheduleViewController = {
-        let vc = ScheduleViewController()
-        vc.delegate = self
-        return vc
-    }()
+   
     
-    private let trackerColors: [UIColor] = [
-        .systemRed,
-        .systemOrange,
-        .systemYellow,
-        .systemGreen,
-        .systemBlue,
-        .systemPurple,
-        .systemPink,
-        .systemTeal,
-        .systemIndigo,
-        .systemBrown
-    ]
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -328,7 +381,7 @@ final class TrackerCreationViewController: UIViewController {
         let newTracker = Tracker(
             name: trackerName,
             color: getRandomColor(),
-            emoji: "😊",
+            emoji: selectedEmoji,
             schedule: Array(selectedDays)
         )
         
@@ -378,7 +431,7 @@ final class TrackerCreationViewController: UIViewController {
 extension TrackerCreationViewController: UITableViewDataSource {
     
     func numberOfSections(in tableView: UITableView) -> Int {
-        return 3
+        return 4
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -388,6 +441,8 @@ extension TrackerCreationViewController: UITableViewDataSource {
         case 1:
             return 1
         case 2:
+            return 1
+        case 3:
             return 1
         default:
             return 0
@@ -456,6 +511,28 @@ extension TrackerCreationViewController: UITableViewDataSource {
                 separatorView.topAnchor.constraint(equalTo: trackerSettingsCategory.bottomAnchor),
                 separatorView.heightAnchor.constraint(equalToConstant: 0.5)
             ])
+        
+        case 3: // Emoji Collection
+            cell.contentView.subviews.forEach { $0.removeFromSuperview() }
+            
+            cell.selectionStyle = .none
+            cell.isUserInteractionEnabled = true
+            cell.contentView.isUserInteractionEnabled = true
+            
+            cell.contentView.addSubview(emojiHeaderLabel)
+            cell.contentView.addSubview(emojiCollectionView)
+            
+            NSLayoutConstraint.activate([
+                emojiHeaderLabel.topAnchor.constraint(equalTo: cell.contentView.topAnchor, constant: 20),
+                emojiHeaderLabel.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor, constant: 28),
+                emojiHeaderLabel.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor, constant: -28),
+                
+                emojiCollectionView.topAnchor.constraint(equalTo: emojiHeaderLabel.bottomAnchor),
+                emojiCollectionView.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor),
+                emojiCollectionView.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor),
+                emojiCollectionView.bottomAnchor.constraint(equalTo: cell.contentView.bottomAnchor),
+                emojiCollectionView.heightAnchor.constraint(equalToConstant: 204)
+            ])
             
         default:
             break
@@ -475,6 +552,10 @@ extension TrackerCreationViewController: UITableViewDelegate {
             return 20
         case 2:
             return 150
+        case 3:
+            let headerHeight: CGFloat = 20 + 19
+            let collectionHeight: CGFloat = 24 + (52 * 3) + 24
+            return headerHeight + collectionHeight
         default:
             return 44
         }
@@ -485,6 +566,9 @@ extension TrackerCreationViewController: UITableViewDelegate {
             tableView.deselectRow(at: indexPath, animated: true)
             let navigationController = UINavigationController(rootViewController: scheduleViewController)
             present(navigationController, animated: true)
+        }
+        else if indexPath.section == 3 {
+            tableView.deselectRow(at: indexPath, animated: true)
         }
     }
     
@@ -603,6 +687,40 @@ extension TrackerCreationViewController: CategoryViewControllerDelegate {
             categories.append(category)
         }
         dismiss(animated: true)
+        setupTrackerCreationCreateButtonUI()
+    }
+}
+
+// MARK: - UICollectionViewDataSource
+extension TrackerCreationViewController: UICollectionViewDataSource {
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return emojis.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        guard let cell = collectionView.dequeueReusableCell(
+            withReuseIdentifier: EmojiCollectionViewCell.identifier,
+            for: indexPath
+        ) as? EmojiCollectionViewCell else {
+            return UICollectionViewCell()
+        }
+        
+        let emoji = emojis[indexPath.item]
+        let isSelected = emoji == selectedEmoji
+        cell.configure(with: emoji, isSelected: isSelected) { [weak self] in
+                    self?.handleEmojiSelection(at: indexPath.item)
+                }
+        return cell
+    }
+    private func handleEmojiSelection(at index: Int) {
+        let newSelectedEmoji = emojis[index]
+
+        guard newSelectedEmoji != selectedEmoji else {
+            return
+        }
+        
+        selectedEmoji = newSelectedEmoji
+        emojiCollectionView.reloadData()
         setupTrackerCreationCreateButtonUI()
     }
 }
