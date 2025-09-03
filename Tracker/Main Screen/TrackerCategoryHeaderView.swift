@@ -8,7 +8,7 @@ final class TrackerCategoryHeaderView: UICollectionReusableView {
     // MARK: - UI Elements
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont(name: "YSDisplay-Bold", size: 19) ?? UIFont.systemFont(ofSize: 19, weight: .bold)
+        label.font = Fonts.ysDisplayBold19 ?? UIFont.systemFont(ofSize: 19, weight: .bold)
         label.textColor = .black
         label.numberOfLines = 1
         label.lineBreakMode = .byTruncatingTail

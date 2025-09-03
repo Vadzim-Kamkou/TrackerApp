@@ -20,7 +20,7 @@ final class ScheduleViewController: UIViewController {
     private lazy var saveButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Готово", for: .normal)
-        button.titleLabel?.font = UIFont(name: "YSDisplay-Medium", size: 16) ?? UIFont.systemFont(ofSize: 16, weight: .medium)
+        button.titleLabel?.font = Fonts.ysDisplayMedium16 ?? UIFont.systemFont(ofSize: 16, weight: .medium)
         button.backgroundColor = .appBlack
         button.setTitleColor(.white, for: .normal)
         button.layer.cornerRadius = 16
@@ -66,7 +66,7 @@ final class ScheduleViewController: UIViewController {
         let appearance = UINavigationBarAppearance()
         appearance.configureWithOpaqueBackground()
         appearance.titleTextAttributes = [
-            .font: UIFont(name: "YSDisplay-Medium", size: 16) ?? UIFont.systemFont(ofSize: 16, weight: .medium),
+            .font: Fonts.ysDisplayMedium16 ?? UIFont.systemFont(ofSize: 16, weight: .medium),
             .foregroundColor: UIColor(resource: .appBlack)
         ]
         appearance.shadowColor = .clear
@@ -87,7 +87,7 @@ final class ScheduleViewController: UIViewController {
             
             let label = UILabel()
             label.text = weekday
-            label.font = UIFont(name: "YSDisplay-Medium", size: 17) ?? UIFont.systemFont(ofSize: 17)
+            label.font = Fonts.ysDisplayMedium17 ?? UIFont.systemFont(ofSize: 17)
             label.textColor = .appBlack
             label.translatesAutoresizingMaskIntoConstraints = false
             weekdayView.addSubview(label)
@@ -188,7 +188,7 @@ extension ScheduleViewController: UITableViewDataSource {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
         
         cell.textLabel?.text = weekdays[indexPath.row]
-        cell.textLabel?.font = UIFont(name: "YSDisplay-Medium", size: 16) ?? UIFont.systemFont(ofSize: 16)
+        cell.textLabel?.font = Fonts.ysDisplayMedium16 ?? UIFont.systemFont(ofSize: 16)
         cell.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
         
         // Добавляем toggle

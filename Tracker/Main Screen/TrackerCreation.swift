@@ -31,7 +31,7 @@ final class TrackerCreationViewController: UIViewController {
         
         textView.textAlignment = .left
         
-        textView.font = UIFont(name: "YSDisplay-Medium", size: 17) ?? UIFont.systemFont(ofSize: 17, weight: .medium)
+        textView.font = Fonts.ysDisplayMedium17 ?? UIFont.systemFont(ofSize: 17, weight: .medium)
         textView.textColor = .appGray
         textView.backgroundColor = .appBackgroundDay
         textView.layer.cornerRadius = 16
@@ -74,13 +74,13 @@ final class TrackerCreationViewController: UIViewController {
         
         let firstTitleLabel = UILabel()
         firstTitleLabel.text = "Категория"
-        firstTitleLabel.font = UIFont(name: "YSDisplay-Medium", size: 17) ?? UIFont.systemFont(ofSize: 17)
+        firstTitleLabel.font = Fonts.ysDisplayMedium17 ?? UIFont.systemFont(ofSize: 17)
         firstTitleLabel.textColor = .appBlack
         
         var firstSubtitleLabel = UILabel()
         self.categorySubtitleLabel = firstSubtitleLabel
         
-        firstSubtitleLabel.font = UIFont(name: "YSDisplay-Medium", size: 17) ?? UIFont.systemFont(ofSize: 17)
+        firstSubtitleLabel.font = Fonts.ysDisplayMedium17 ?? UIFont.systemFont(ofSize: 17)
         firstSubtitleLabel.textColor = .appGray
         
         let arrowImageView = UIImageView(image: UIImage(resource: .chevronRight))
@@ -145,7 +145,7 @@ final class TrackerCreationViewController: UIViewController {
     private lazy var trackerCreationCancelButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Отмена", for: .normal)
-        button.titleLabel?.font = UIFont(name: "YSDisplay-Medium", size: 16) ?? UIFont.systemFont(ofSize: 16, weight: .medium)
+        button.titleLabel?.font = Fonts.ysDisplayMedium16 ?? UIFont.systemFont(ofSize: 16, weight: .medium)
         button.backgroundColor = .white
         button.setTitleColor(.appRed, for: .normal)
         button.layer.borderWidth = 1.0
@@ -158,7 +158,7 @@ final class TrackerCreationViewController: UIViewController {
     private lazy var trackerCreationCreateButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Создать", for: .normal)
-        button.titleLabel?.font = UIFont(name: "YSDisplay-Medium", size: 16) ?? UIFont.systemFont(ofSize: 16, weight: .medium)
+        button.titleLabel?.font = Fonts.ysDisplayMedium16 ?? UIFont.systemFont(ofSize: 16, weight: .medium)
         button.backgroundColor = .appGray
         button.setTitleColor(.white, for: .normal)
         button.layer.cornerRadius = 16
@@ -211,7 +211,7 @@ final class TrackerCreationViewController: UIViewController {
         let appearance = UINavigationBarAppearance()
         appearance.configureWithOpaqueBackground()
         appearance.titleTextAttributes = [
-            .font: UIFont(name: "YSDisplay-Medium", size: 16) ?? UIFont.systemFont(ofSize: 16, weight: .bold),
+            .font: Fonts.ysDisplayMedium16 ?? UIFont.systemFont(ofSize: 16, weight: .bold),
             .foregroundColor: UIColor(resource: .appBlack)
         ]
         appearance.shadowColor = .clear
@@ -229,14 +229,14 @@ final class TrackerCreationViewController: UIViewController {
         
         let label = UILabel()
         label.text = "Расписание"
-        label.font = UIFont(name: "YSDisplay-Medium", size: 17) ?? UIFont.systemFont(ofSize: 17)
+        label.font = Fonts.ysDisplayMedium17 ?? UIFont.systemFont(ofSize: 17)
         label.textColor = .appBlack
         view.addSubview(label)
         label.translatesAutoresizingMaskIntoConstraints = false
         
         let daysLabel = UILabel()
         daysLabel.text = selectedDaysString
-        daysLabel.font = UIFont(name: "YSDisplay-Medium", size: 17) ?? UIFont.systemFont(ofSize: 17)
+        daysLabel.font = Fonts.ysDisplayMedium17 ?? UIFont.systemFont(ofSize: 17)
         daysLabel.textColor = .appGray
         daysLabel.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(daysLabel)
@@ -309,7 +309,7 @@ final class TrackerCreationViewController: UIViewController {
     }
     
     private func getRandomColor() -> UIColor {
-        return trackerColors.randomElement() ?? .systemBlue
+        trackerColors.randomElement() ?? .systemBlue
     }
     
     @objc private func trackerCreationCancelButtonTapped() {
@@ -513,7 +513,7 @@ extension TrackerCreationViewController: UITableViewDelegate {
             
             let label = UILabel()
             label.text = "Ограничение 38 символов"
-            label.font = UIFont(name: "YSDisplay-Medium", size: 17) ?? UIFont.systemFont(ofSize: 17, weight: .regular)
+            label.font = Fonts.ysDisplayMedium17 ?? UIFont.systemFont(ofSize: 17, weight: .regular)
             label.textColor = UIColor(resource: .appRed)
             label.textAlignment = .center
             
@@ -531,10 +531,7 @@ extension TrackerCreationViewController: UITableViewDelegate {
         return nil
     }
     func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
-        if section == 0 && isOverLimitTextView {
-            return 30
-        }
-        return 0.01
+        section == 0 && isOverLimitTextView ? 30 : 0.01
     }
 }
 
@@ -555,9 +552,10 @@ extension TrackerCreationViewController: UITextViewDelegate {
         let wasOverLimit = isOverLimitTextView
         isOverLimitTextView = currentCount > trackerCreateTextViewMaxCharacters
         
-        if currentCount >= trackerCreateTextViewMaxCharacters {
-            let index = textView.text!.index(textView.text!.startIndex, offsetBy: trackerCreateTextViewMaxCharacters)
-            textView.text = String(textView.text![..<index])
+        if currentCount >= trackerCreateTextViewMaxCharacters,
+           let text = textView.text,
+           let index = text.index(text.startIndex, offsetBy: trackerCreateTextViewMaxCharacters, limitedBy: text.endIndex) {
+            textView.text = String(text[..<index])
         }
         
         clearButton.isHidden = textView.text.isEmpty

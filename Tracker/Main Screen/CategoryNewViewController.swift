@@ -11,7 +11,7 @@ final class CategoryNewViewController: UIViewController {
     private lazy var categoryTextField: UITextField = {
         let textField = UITextField()
         textField.placeholder = "Введите название категории"
-        textField.font = UIFont(name: "YSDisplay-Medium", size: 17) ?? UIFont.systemFont(ofSize: 17, weight: .medium)
+        textField.font = Fonts.ysDisplayMedium17 ?? UIFont.systemFont(ofSize: 17, weight: .medium)
         textField.textColor = .appBlack
         textField.backgroundColor = .appBackgroundDay
         textField.layer.cornerRadius = 16
@@ -35,7 +35,7 @@ final class CategoryNewViewController: UIViewController {
     private lazy var doneButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Готово", for: .normal)
-        button.titleLabel?.font = UIFont(name: "YSDisplay-Medium", size: 16) ?? UIFont.systemFont(ofSize: 16, weight: .medium)
+        button.titleLabel?.font = Fonts.ysDisplayMedium16 ?? UIFont.systemFont(ofSize: 16, weight: .medium)
         button.backgroundColor = .appGray
         button.setTitleColor(.white, for: .normal)
         button.layer.cornerRadius = 16
@@ -77,7 +77,7 @@ final class CategoryNewViewController: UIViewController {
         let appearance = UINavigationBarAppearance()
         appearance.configureWithOpaqueBackground()
         appearance.titleTextAttributes = [
-            .font: UIFont(name: "YSDisplay-Medium", size: 16) ?? UIFont.systemFont(ofSize: 16, weight: .medium),
+            .font: Fonts.ysDisplayMedium16 ?? UIFont.systemFont(ofSize: 16, weight: .medium),
             .foregroundColor: UIColor(resource: .appBlack)
         ]
         appearance.shadowColor = .clear
@@ -100,12 +100,7 @@ final class CategoryNewViewController: UIViewController {
     @objc private func textFieldDidChange() {
         let isEmpty = categoryTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true
         doneButton.isEnabled = !isEmpty
-        
-        if isEmpty {
-            doneButton.backgroundColor = .appGray
-        } else {
-            doneButton.backgroundColor = .appBlack
-        }
+        doneButton.backgroundColor = isEmpty ? .appGray : .appBlack
     }
     
     @objc private func doneButtonTapped() {

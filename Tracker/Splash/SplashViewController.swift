@@ -1,6 +1,6 @@
 import UIKit
 
-class SplashViewController: UIViewController {
+final class SplashViewController: UIViewController {
 
     // MARK: Property
     private var logoSplashScreen: UIView?
@@ -10,9 +10,13 @@ class SplashViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-        guard let window = view.window else { fatalError("Invalid Configuration") }
-           let tabBarController = TabBarController()
-           window.rootViewController = tabBarController
+        guard let window = view.window else {
+            assertionFailure("Invalid Configuration - view.window is nil")
+            return
+        }
+        
+        let tabBarController = TabBarController()
+        window.rootViewController = tabBarController
     }
     
     override func viewDidLoad() {

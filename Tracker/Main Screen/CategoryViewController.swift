@@ -30,7 +30,7 @@ final class CategoryViewController: UIViewController {
         
         let label = UILabel()
         label.text = "Привычки и события можно\nобъединить по смыслу"
-        label.font = UIFont(name: "YSDisplay-Medium", size: 12) ?? UIFont.systemFont(ofSize: 12)
+        label.font = Fonts.ysDisplayMedium12 ?? UIFont.systemFont(ofSize: 12)
         label.textColor = .appGray
         label.textAlignment = .center
         label.numberOfLines = 0
@@ -51,7 +51,7 @@ final class CategoryViewController: UIViewController {
     private lazy var addCategoryButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Добавить категорию", for: .normal)
-        button.titleLabel?.font = UIFont(name: "YSDisplay-Medium", size: 16) ?? UIFont.systemFont(ofSize: 16, weight: .medium)
+        button.titleLabel?.font = Fonts.ysDisplayMedium16 ?? UIFont.systemFont(ofSize: 16, weight: .medium)
         button.backgroundColor = .appBlack
         button.setTitleColor(.white, for: .normal)
         button.layer.cornerRadius = 16
@@ -103,7 +103,7 @@ final class CategoryViewController: UIViewController {
         let appearance = UINavigationBarAppearance()
         appearance.configureWithOpaqueBackground()
         appearance.titleTextAttributes = [
-            .font: UIFont(name: "YSDisplay-Medium", size: 16) ?? UIFont.systemFont(ofSize: 16, weight: .medium),
+            .font: Fonts.ysDisplayMedium16 ?? UIFont.systemFont(ofSize: 16, weight: .medium),
             .foregroundColor: UIColor(resource: .appBlack)
         ]
         appearance.shadowColor = .clear
@@ -115,13 +115,10 @@ final class CategoryViewController: UIViewController {
     }
     
     private func updateUI() {
+        emptyStateView.isHidden = !categories.isEmpty
+        tableView.isHidden = categories.isEmpty
         if categories.isEmpty {
-            emptyStateView.isHidden = false
-            tableView.isHidden = true
-        } else {
-            emptyStateView.isHidden = true
-            tableView.isHidden = false
-            tableView.reloadData()
+           tableView.reloadData()
         }
     }
     
@@ -233,7 +230,7 @@ extension CategoryViewController: UITableViewDataSource {
         view.translatesAutoresizingMaskIntoConstraints = false
         let label = UILabel()
         label.text = title
-        label.font = UIFont(name: "YSDisplay-Medium", size: 16) ?? .systemFont(ofSize: 16)
+        label.font = Fonts.ysDisplayMedium16 ?? .systemFont(ofSize: 16)
         label.textColor = .appBlack
         label.translatesAutoresizingMaskIntoConstraints = false
         let icon  = UIImageView(image: UIImage(resource: .check))

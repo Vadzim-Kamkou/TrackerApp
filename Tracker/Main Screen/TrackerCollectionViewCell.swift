@@ -26,7 +26,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont(name: "YSDisplay-Medium", size: 12) ?? UIFont.systemFont(ofSize: 12, weight: .medium)
+        label.font = Fonts.ysDisplayMedium12 ?? UIFont.systemFont(ofSize: 12, weight: .medium)
         label.textColor = .white
         label.numberOfLines = 2
         label.lineBreakMode = .byTruncatingTail
@@ -36,7 +36,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     
     private let counterLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont(name: "YSDisplay-Medium", size: 12) ?? UIFont.systemFont(ofSize: 12, weight: .medium)
+        label.font = Fonts.ysDisplayMedium12 ?? UIFont.systemFont(ofSize: 12, weight: .medium)
         label.textColor = .black
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -157,7 +157,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         if let range = fullText.range(of: "\(days)") {
             let nsRange = NSRange(range, in: fullText)
             attributedString.addAttribute(.font,
-                                        value: UIFont(name: "YSDisplay-Bold", size: 12) ?? UIFont.boldSystemFont(ofSize: 12),
+                                        value: Fonts.ysDisplayBold12 ?? UIFont.boldSystemFont(ofSize: 12),
                                         range: nsRange)
         }
            

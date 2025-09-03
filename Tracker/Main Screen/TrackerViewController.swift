@@ -9,7 +9,27 @@ final class TrackerViewController: UIViewController {
     private var trackerSearchBar: UISearchBar?
     
     private let datePicker = UIDatePicker()
-    private var collectionView: UICollectionView!
+
+    private lazy var collectionView: UICollectionView = {
+        let layout = createLayout()
+        let cv = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        cv.translatesAutoresizingMaskIntoConstraints = false
+        cv.backgroundColor = .clear
+        cv.delegate = self
+        cv.dataSource = self
+        
+        cv.register(TrackerCollectionViewCell.self,
+                   forCellWithReuseIdentifier: TrackerCollectionViewCell.identifier)
+        cv.register(TrackerCategoryHeaderView.self,
+                   forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
+                   withReuseIdentifier: TrackerCategoryHeaderView.identifier)
+        
+        return cv
+    }()
+    
+    
+    
+    
     
     private lazy var datePickerButton: UIBarButtonItem = {
         datePicker.datePickerMode = .date
@@ -81,7 +101,7 @@ final class TrackerViewController: UIViewController {
         
         let trackerTitleLabel = UILabel()
         trackerTitleLabel.text = "Трекеры"
-        trackerTitleLabel.font = UIFont(name: "YSDisplay-Bold", size: 34) ?? UIFont.systemFont(ofSize: 34)
+        trackerTitleLabel.font = Fonts.ysDisplayBold34 ?? UIFont.systemFont(ofSize: 34)
         trackerTitleLabel.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(trackerTitleLabel)
         self.trackerTitleLabel = trackerTitleLabel
@@ -113,7 +133,7 @@ final class TrackerViewController: UIViewController {
         
         let trackerLabel = UILabel()
         trackerLabel.text = "Что будем отслеживать?"
-        trackerLabel.font = UIFont(name: "YSDisplay-Medium", size: 12) ?? UIFont.systemFont(ofSize: 12)
+        trackerLabel.font = Fonts.ysDisplayMedium12 ?? UIFont.systemFont(ofSize: 12)
         trackerLabel.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(trackerLabel)
         
@@ -131,23 +151,14 @@ final class TrackerViewController: UIViewController {
     
     // MARK: - Collection View Setup
     private func setupCollectionView() {
-        let layout = createLayout()
-        collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
-        collectionView.translatesAutoresizingMaskIntoConstraints = false
-        collectionView.backgroundColor = .clear
-        collectionView.delegate = self
-        collectionView.dataSource = self
-        
-        collectionView.register(TrackerCollectionViewCell.self,
-                               forCellWithReuseIdentifier: TrackerCollectionViewCell.identifier)
-        collectionView.register(TrackerCategoryHeaderView.self,
-                               forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
-                               withReuseIdentifier: TrackerCategoryHeaderView.identifier)
-        
         view.addSubview(collectionView)
+        guard let searchBar = trackerSearchBar else {
+            assertionFailure("trackerSearchBar should be initialized before setupCollectionView")
+            return
+        }
         
         NSLayoutConstraint.activate([
-            collectionView.topAnchor.constraint(equalTo: trackerSearchBar!.bottomAnchor, constant: 10),
+            collectionView.topAnchor.constraint(equalTo: searchBar.bottomAnchor, constant: 10),
             collectionView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
             collectionView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
             collectionView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
