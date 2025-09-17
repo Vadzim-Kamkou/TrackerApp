@@ -110,7 +110,6 @@ final class CategoryNewViewController: UIViewController {
         }
         
         let newCategory = TrackerCategory(title: categoryName, trackers: [])
-        NotificationCenter.default.post(name: .categoryAdded, object: newCategory)
         delegate?.didCreateCategory(newCategory)
         dismiss(animated: true)
     }

@@ -6,6 +6,12 @@ protocol CategoryViewControllerDelegate: AnyObject {
 
 final class TrackerCreationViewController: UIViewController {
     
+    private let coreDataManager: CoreDataManagerProtocol
+    
+    private let trackerStore: TrackerStore?
+    private let trackerCategoryStore: TrackerCategoryStore?
+    
+    
     // MARK: - Main Table
     private lazy var tableView: UITableView = {
         let tableView = UITableView(frame: .zero, style: .grouped)
@@ -210,7 +216,7 @@ final class TrackerCreationViewController: UIViewController {
         .appTrackerColorViolet,
         .appTrackerColorEmerald
     ]
-
+    
     private lazy var colorHeaderLabel: UILabel = {
         let label = UILabel()
         label.text = "Цвет"
@@ -282,7 +288,19 @@ final class TrackerCreationViewController: UIViewController {
         return button
     }()
     
-   
+    init(coreDataManager: CoreDataManagerProtocol,
+         trackerStore: TrackerStore?,
+         trackerCategoryStore: TrackerCategoryStore?) {
+        self.coreDataManager = coreDataManager
+        self.trackerStore = trackerStore
+        self.trackerCategoryStore = trackerCategoryStore
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
@@ -388,7 +406,7 @@ final class TrackerCreationViewController: UIViewController {
         
         return view
     }
-
+    
     private func setupTrackerCreationCreateButtonUI () {
         if trackerCreateTextView.text == trackerCreateTextViewDefaultText ||
             chosenCategoryTitle == nil ||
@@ -410,6 +428,7 @@ final class TrackerCreationViewController: UIViewController {
     }
     
     @objc private func trackerCreationCreateButtonTapped() {
+        
         guard let trackerName = trackerCreateTextView.text,
               trackerName != trackerCreateTextViewDefaultText,
               !trackerName.isEmpty,
@@ -425,22 +444,31 @@ final class TrackerCreationViewController: UIViewController {
             schedule: Array(selectedDays)
         )
         
-        let newCategories = categories.map { category in
-            if category.title == categoryTitle {
-                let newTrackers = category.trackers + [newTracker]
-                return TrackerCategory(title: categoryTitle, trackers: newTrackers)
-            } else {
-                return category
+        do {
+            guard let trackerCategoryStore = trackerCategoryStore else {
+                print("TrackerCategoryStore is not available")
+                return
+            }
+            
+            try trackerCategoryStore.addTrackerToCategory(newTracker, categoryTitle: categoryTitle)
+            print("Tracker '\(trackerName)' successfully saved to Core Data")
+            
+            DispatchQueue.main.async { [weak self] in
+                self?.dismiss(animated: true)
+            }
+            
+        } catch {
+            print("Failed to save tracker: \(error)")
+            DispatchQueue.main.async { [weak self] in
+                self?.showErrorAlert("Ошибка сохранения трекера")
             }
         }
-        
-        categories = newCategories
-        
-        if let updatedCategory = newCategories.first(where: { $0.title == categoryTitle }) {
-            NotificationCenter.default.post(name: .categoryAdded, object: updatedCategory)
-        }
-        
-        dismiss(animated: true)
+    }
+    
+    private func showErrorAlert(_ message: String) {
+        let alert = UIAlertController(title: "Ошибка", message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alert, animated: true)
     }
     
     @objc private func clearButtonTapped() {
@@ -454,7 +482,7 @@ final class TrackerCreationViewController: UIViewController {
     }
     
     @objc private func scheduleTapped() {
-       
+        
         trackerCreateTextView.resignFirstResponder()
         
         let navigationController = UINavigationController(rootViewController: scheduleViewController)
@@ -464,9 +492,8 @@ final class TrackerCreationViewController: UIViewController {
         
         trackerCreateTextView.resignFirstResponder()
         
-        let categoryVC = CategoryViewController()
+        let categoryVC = CategoryViewController(trackerCategoryStore: trackerCategoryStore)
         categoryVC.delegate = self
-        categoryVC.categories       = self.categories
         categoryVC.preselectedTitle = chosenCategoryTitle
         let navigationController = UINavigationController(rootViewController: categoryVC)
         present(navigationController, animated: true)
@@ -559,7 +586,7 @@ extension TrackerCreationViewController: UITableViewDataSource {
                 separatorView.topAnchor.constraint(equalTo: trackerSettingsCategory.bottomAnchor),
                 separatorView.heightAnchor.constraint(equalToConstant: 0.5)
             ])
-        
+            
         case 3: // Emoji Collection
             cell.contentView.subviews.forEach { $0.removeFromSuperview() }
             
@@ -768,7 +795,6 @@ extension TrackerCreationViewController: CategoryViewControllerDelegate {
 }
 
 // MARK: - UICollectionViewDataSource
-// MARK: - UICollectionViewDataSource
 extension TrackerCreationViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         if collectionView == emojiCollectionView {
@@ -782,7 +808,7 @@ extension TrackerCreationViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         
         if collectionView == emojiCollectionView {
-         
+            
             guard let cell = collectionView.dequeueReusableCell(
                 withReuseIdentifier: EmojiCollectionViewCell.identifier,
                 for: indexPath
@@ -798,7 +824,7 @@ extension TrackerCreationViewController: UICollectionViewDataSource {
             return cell
             
         } else if collectionView == colorCollectionView {
-
+            
             guard let cell = collectionView.dequeueReusableCell(
                 withReuseIdentifier: ColorCollectionViewCell.identifier,
                 for: indexPath

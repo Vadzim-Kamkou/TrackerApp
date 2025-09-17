@@ -7,14 +7,6 @@ final class ColorCollectionViewCell: UICollectionViewCell {
     var onTap: (() -> Void)?
     
     // MARK: - UI Elements
-    private let emojiLabel: UILabel = {
-        let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 32)
-        label.textAlignment = .center
-        label.translatesAutoresizingMaskIntoConstraints = false
-        return label
-    }()
-    
     private let colorRect: UIView = {
         let view = UIView()
         view.backgroundColor = UIColor(resource: .appLightGray)

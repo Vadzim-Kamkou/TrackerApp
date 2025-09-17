@@ -8,6 +8,8 @@ final class CategoryViewController: UIViewController {
     private var selectedIndex: Int?
     var preselectedTitle: String?
     
+    private let trackerCategoryStore: TrackerCategoryStore?
+    
     private lazy var tableView: UITableView = {
         let tv = UITableView(frame: .zero, style: .plain)
         tv.backgroundColor = .clear
@@ -18,7 +20,7 @@ final class CategoryViewController: UIViewController {
         tv.translatesAutoresizingMaskIntoConstraints = false
         return tv
     }()
-
+    
     private lazy var emptyStateView: UIView = {
         let view = UIView()
         view.backgroundColor = .clear
@@ -59,16 +61,33 @@ final class CategoryViewController: UIViewController {
         return button
     }()
     
+    init(trackerCategoryStore: TrackerCategoryStore?) {
+        self.trackerCategoryStore = trackerCategoryStore
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
         setupNavigationBar()
+        loadCategoriesFromStore()
         
         if let title = preselectedTitle {
             selectedIndex = categories.firstIndex { $0.title == title }
         }
         
         updateUI()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        loadCategoriesFromStore()
     }
     
     private func setupUI() {
@@ -114,11 +133,26 @@ final class CategoryViewController: UIViewController {
         title = "Категория"
     }
     
+    private func loadCategoriesFromStore() {
+        guard let trackerCategoryStore = trackerCategoryStore else {
+            print("TrackerCategoryStore is not available for category loading")
+            return
+        }
+        
+        do {
+            let loadedCategories = try trackerCategoryStore.fetchTrackerCategory()
+            self.categories = loadedCategories
+            print("Loaded \(loadedCategories.count) categories for TrackerCreationVC")
+        } catch {
+            print("Failed to load categories in TrackerCreationVC: \(error)")
+        }
+    }
+    
     private func updateUI() {
         emptyStateView.isHidden = !categories.isEmpty
         tableView.isHidden = categories.isEmpty
         if categories.isEmpty {
-           tableView.reloadData()
+            tableView.reloadData()
         }
     }
     
@@ -142,17 +176,14 @@ final class CategoryViewController: UIViewController {
 
 // MARK: - CategoryNewViewControllerDelegate
 extension CategoryViewController: CategoryNewViewControllerDelegate {
-    
     func didCreateCategory(_ category: TrackerCategory) {
         categories.append(category)
         selectedIndex = categories.count - 1
         updateUI()
         tableView.reloadData()
-
+        
         delegate?.didSelectCategory(category)
-
         dismiss(animated: true)
-  
     }
 }
 
@@ -161,30 +192,30 @@ extension CategoryViewController: UITableViewDataSource {
     
     func numberOfSections(in tableView: UITableView) -> Int { 1 }
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int { 1 }
-
+    
     func tableView(_ tv: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tv.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
         cell.backgroundColor = .clear
-
+        
         let listView = UIView()
         listView.backgroundColor = .appBackgroundDay
         listView.layer.cornerRadius = 16
         listView.translatesAutoresizingMaskIntoConstraints = false
-
+        
         cell.contentView.subviews.forEach { $0.removeFromSuperview() }
         cell.contentView.addSubview(listView)
-
+        
         NSLayoutConstraint.activate([
             listView.topAnchor.constraint(equalTo: cell.contentView.topAnchor),
             listView.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor),
             listView.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor),
             listView.bottomAnchor.constraint(equalTo: cell.contentView.bottomAnchor)
         ])
-
+        
         addCategorySubviews(into: listView)
         return cell
     }
-
+    
     private func addCategorySubviews(into parent: UIView) {
         parent.subviews.forEach { $0.removeFromSuperview() }
         var previous: UIView?
@@ -224,7 +255,7 @@ extension CategoryViewController: UITableViewDataSource {
         }
         previous?.bottomAnchor.constraint(equalTo: parent.bottomAnchor).isActive = true
     }
-
+    
     private func makeCategoryRow(title: String, index: Int) -> UIView {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false

@@ -176,28 +176,3 @@ final class ScheduleViewController: UIViewController {
         dismiss(animated: true)
     }
 }
-
-// MARK: - UITableViewDataSource
-extension ScheduleViewController: UITableViewDataSource {
-    
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return weekdays.count
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
-        
-        cell.textLabel?.text = weekdays[indexPath.row]
-        cell.textLabel?.font = Fonts.ysDisplayMedium16 ?? UIFont.systemFont(ofSize: 16)
-        cell.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
-        
-        // Добавляем toggle
-        let toggle = UISwitch()
-        toggle.isOn = selectedDays.contains(indexPath.row)
-        toggle.addTarget(self, action: #selector(toggleChanged(_:)), for: .valueChanged)
-        toggle.tag = indexPath.row
-        cell.accessoryView = toggle
-        
-        return cell
-    }
-}

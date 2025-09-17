@@ -157,10 +157,10 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         if let range = fullText.range(of: "\(days)") {
             let nsRange = NSRange(range, in: fullText)
             attributedString.addAttribute(.font,
-                                        value: Fonts.ysDisplayBold12 ?? UIFont.boldSystemFont(ofSize: 12),
-                                        range: nsRange)
+                                          value: Fonts.ysDisplayBold12 ?? UIFont.boldSystemFont(ofSize: 12),
+                                          range: nsRange)
         }
-           
+        
         counterLabel.attributedText = attributedString 
     }
     
@@ -177,10 +177,10 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
             actionButton.layer.borderWidth = 0
         }
         UIView.transition(with: actionButton,
-                            duration: 0.2,
-                            options: .transitionCrossDissolve,
-                            animations: nil,
-                            completion: nil)
+                          duration: 0.2,
+                          options: .transitionCrossDissolve,
+                          animations: nil,
+                          completion: nil)
     }
     
     // MARK: - Actions
@@ -207,7 +207,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         tracker = nil
         isCompleted = false
         completionHandler = nil
- 
+        
         emojiLabel.text = nil
         titleLabel.text = nil
         titleLabel.attributedText = nil
