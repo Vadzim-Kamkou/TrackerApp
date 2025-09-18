@@ -22,7 +22,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         return CoreDataManager(container: persistentContainer)
     }()
     
-    
     // MARK: - Application Lifecycle
     func applicationWillTerminate(_ application: UIApplication) {
         coreDataManager.saveContext()

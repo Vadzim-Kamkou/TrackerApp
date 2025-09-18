@@ -6,6 +6,7 @@ protocol ScheduleViewControllerDelegate: AnyObject {
 
 final class ScheduleViewController: UIViewController {
     
+    // MARK: - Properties
     weak var delegate: ScheduleViewControllerDelegate?
     
     private lazy var scheduleWeekdaysListView: UIView = {
@@ -34,6 +35,7 @@ final class ScheduleViewController: UIViewController {
     private var weekdayViews: [UIView] = []
     private var separatorViews: [UIView] = []
     
+    // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
@@ -41,6 +43,7 @@ final class ScheduleViewController: UIViewController {
         createWeekdayItems()
     }
     
+    // MARK: - Setup
     private func setupUI() {
         view.backgroundColor = .white
         

@@ -5,7 +5,6 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     // MARK: - Properties
     static let identifier = "TrackerCollectionViewCell"
     
-    // MARK: - UI Elements
     private let backgroundCardView: UIView = {
         let view = UIView()
         view.layer.cornerRadius = 16
@@ -50,12 +49,11 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         return button
     }()
     
-    // MARK: - Private Properties
     private var tracker: Tracker?
     private var isCompleted: Bool = false
     private var completionHandler: ((Bool) -> Void)?
     
-    // MARK: - Initialization
+    // MARK: - Init
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupUI()

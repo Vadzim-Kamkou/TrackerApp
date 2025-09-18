@@ -1,29 +1,9 @@
 import UIKit
 import CoreData
 
-protocol TrackerRecordStoreDelegate: AnyObject {
-    func store(_ store: TrackerRecordStore, didUpdate update: TrackerRecordStoreUpdate)
-}
-
-struct TrackerRecordStoreUpdate {
-    struct Move: Hashable {
-        let oldIndex: Int
-        let newIndex: Int
-    }
-    let insertedIndexes: IndexSet
-    let deletedIndexes: IndexSet
-    let updatedIndexes: IndexSet
-    let movedIndexes: Set<Move>
-}
-
-enum TrackerRecordStoreError: Error {
-    case decodingErrorInvalidId
-    case decodingErrorInvalidDate
-    
-}
-
 final class TrackerRecordStore: NSObject {
     
+    // MARK: - Properties
     private let context: NSManagedObjectContext
     private var fetchedResultsController: NSFetchedResultsController<TrackerRecordCoreData>?
     
@@ -33,38 +13,25 @@ final class TrackerRecordStore: NSObject {
     private var updatedIndexes: IndexSet?
     private var movedIndexes: Set<TrackerRecordStoreUpdate.Move>?
     
+    // MARK: - Init
     init(context: NSManagedObjectContext) throws {
         self.context = context
         super.init()
         try setupFetchedResultsController()
     }
     
-    private func setupFetchedResultsController() throws {
-        let fetchRequest = TrackerRecordCoreData.fetchRequest()
-        
-        fetchRequest.sortDescriptors = [
-            NSSortDescriptor(key: "date", ascending: false),
-            NSSortDescriptor(key: "id", ascending: true)
-        ]
-        
-        let controller = NSFetchedResultsController(
-            fetchRequest: fetchRequest,
-            managedObjectContext: context,
-            sectionNameKeyPath: nil,
-            cacheName: nil
-        )
-        
-        controller.delegate = self
-        self.fetchedResultsController = controller
-        try controller.performFetch()
-    }
-    
-    func addTrackerRecord(_ trackerRecord: TrackerRecord) throws {
-        let trackerRecordCoreData = TrackerRecordCoreData(context: context)
-        trackerRecordCoreData.id = trackerRecord.id
-        trackerRecordCoreData.date = trackerRecord.date
-        
-        try context.save()
+    // MARK: - Public Functions
+    func addTrackerRecord(_ trackerRecord: TrackerRecord) {
+        do {
+            let trackerRecordCoreData = TrackerRecordCoreData(context: context)
+            trackerRecordCoreData.id = trackerRecord.id
+            trackerRecordCoreData.date = trackerRecord.date
+            
+            try context.save()
+        } catch {
+            assertionFailure("Failed to add TrackerRecord: \(error.localizedDescription)")
+            print("Failed to save TrackerRecord: \(error)")
+        }
     }
     
     func deleteTrackerRecord(with trackerId: UUID, on date: Date) throws {
@@ -110,8 +77,30 @@ final class TrackerRecordStore: NSObject {
             date: date
         )
     }
+
+    // MARK: - Private Functions
+    private func setupFetchedResultsController() throws {
+        let fetchRequest = TrackerRecordCoreData.fetchRequest()
+        
+        fetchRequest.sortDescriptors = [
+            NSSortDescriptor(key: "date", ascending: false),
+            NSSortDescriptor(key: "id", ascending: true)
+        ]
+        
+        let controller = NSFetchedResultsController(
+            fetchRequest: fetchRequest,
+            managedObjectContext: context,
+            sectionNameKeyPath: nil,
+            cacheName: nil
+        )
+        
+        controller.delegate = self
+        self.fetchedResultsController = controller
+        try controller.performFetch()
+    }
 }
 
+// MARK: - Extension
 extension TrackerRecordStore: NSFetchedResultsControllerDelegate {
     func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         insertedIndexes = IndexSet()

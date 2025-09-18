@@ -65,7 +65,7 @@ final class TrackerViewController: UIViewController {
         return button
     }()
     
-    // MARK: - Data Properties
+    // MARK: - Properties Data
     var categories: [TrackerCategory] = []
     var completedTrackers: Set<String> = []
     private var currentDate = Date()
@@ -77,8 +77,6 @@ final class TrackerViewController: UIViewController {
         formatter.dateFormat = "yyyy-MM-dd"
         return "\(trackerId.uuidString)_\(formatter.string(from: dayStart))"
     }
-    
-    // MARK: - Filtered Data
     
     private var filteredCategories: [TrackerCategory] {
         let result: [TrackerCategory] = categories.compactMap { category in
@@ -99,16 +97,17 @@ final class TrackerViewController: UIViewController {
         return result
     }
     
+    // MARK: - Init
     init(coreDataManager: CoreDataManagerProtocol) {
         self.coreDataManager = coreDataManager
         super.init(nibName: nil, bundle: nil)
-        
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
+    // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -124,15 +123,8 @@ final class TrackerViewController: UIViewController {
         
         loadInitialData()
     }
-    
-    private func loadInitialData() {
-        print("Loading initial data from Core Data")
-        loadTrackersCategoryFromStore()
-        loadTrackerRecordsFromStore()
-        updateViewVisibility()
-    }
-    
-    // MARK: - Setup UI
+
+    // MARK: - Setup
     private func setupUI() {
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(donePressed))
         view.addGestureRecognizer(tapGesture)
@@ -161,6 +153,13 @@ final class TrackerViewController: UIViewController {
         ])
         
         setupEmptyStateView()
+    }
+    
+    private func loadInitialData() {
+        print("Loading initial data from Core Data")
+        loadTrackersCategoryFromStore()
+        loadTrackerRecordsFromStore()
+        updateViewVisibility()
     }
     
     private func setupEmptyStateView() {
@@ -323,7 +322,7 @@ final class TrackerViewController: UIViewController {
     }
 }
 
-// MARK: - UICollectionViewDataSource
+// MARK: - Extension UICollectionViewDataSource
 extension TrackerViewController: UICollectionViewDataSource {
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         return filteredCategories.count
@@ -368,7 +367,7 @@ extension TrackerViewController: UICollectionViewDataSource {
     }
 }
 
-// MARK: - UICollectionViewDelegate
+// MARK: - Extension UICollectionViewDelegate
 extension TrackerViewController: UICollectionViewDelegate {
     private func handleTrackerCompletion(tracker: Tracker, completed: Bool) {
         let key = recordKey(trackerId: tracker.id, date: currentDate)
@@ -393,7 +392,7 @@ extension TrackerViewController: UICollectionViewDelegate {
     }
 }
 
-
+// MARK: - Extension
 extension TrackerViewController: TrackerStoreDelegate {
     func store(_ store: TrackerStore, didUpdate update: TrackerStoreUpdate) {
         print("TrackerStore updated")
@@ -406,7 +405,7 @@ extension TrackerViewController: TrackerStoreDelegate {
         }
     }
 }
-
+// MARK: - Extension
 extension TrackerViewController: TrackerCategoryStoreDelegate {
     func store(_ store: TrackerCategoryStore, didUpdate update: TrackerCategoryStoreUpdate) {
         print("TrackerCategoryStore updated")
@@ -440,7 +439,7 @@ extension TrackerViewController: TrackerCategoryStoreDelegate {
         }
     }
 }
-
+// MARK: - Extension
 extension TrackerViewController: TrackerRecordStoreDelegate {
     func store(_ store: TrackerRecordStore, didUpdate update: TrackerRecordStoreUpdate) {
         print("TrackerRecordStore updated")

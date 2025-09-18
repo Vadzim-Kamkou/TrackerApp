@@ -6,7 +6,6 @@ final class EmojiCollectionViewCell: UICollectionViewCell {
     static let identifier = "EmojiCollectionViewCell"
     var onTap: (() -> Void)?
     
-    // MARK: - UI Elements
     private let emojiLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 32)
@@ -24,7 +23,7 @@ final class EmojiCollectionViewCell: UICollectionViewCell {
         return view
     }()
     
-    // MARK: - Initialization
+    // MARK: - Init
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupUI()

@@ -6,13 +6,14 @@ protocol CategoryViewControllerDelegate: AnyObject {
 
 final class TrackerCreationViewController: UIViewController {
     
+    // MARK: - Properties
     private let coreDataManager: CoreDataManagerProtocol
     
     private let trackerStore: TrackerStore?
     private let trackerCategoryStore: TrackerCategoryStore?
     
     
-    // MARK: - Main Table
+    // MARK: - Properties Main Table
     private lazy var tableView: UITableView = {
         let tableView = UITableView(frame: .zero, style: .grouped)
         tableView.delegate = self
@@ -23,7 +24,7 @@ final class TrackerCreationViewController: UIViewController {
         return tableView
     }()
     
-    // MARK: - Tracker Name
+    // MARK: - Properties Tracker
     private let trackerCreateTextViewMaxCharacters = 38
     private var isOverLimitTextView = false
     private let trackerCreateTextViewDefaultText = "Введите название трекера"
@@ -57,8 +58,7 @@ final class TrackerCreationViewController: UIViewController {
         return button
     }()
     
-    
-    // MARK: - Tracker Settings
+    // MARK: - Properties Category
     var categories: [TrackerCategory] = []
     private var chosenCategoryTitle: String?
     private var categorySubtitleLabel: UILabel?
@@ -133,6 +133,7 @@ final class TrackerCreationViewController: UIViewController {
         return view
     }()
     
+    // MARK: - Properties Schedule
     private var selectedDaysString: String = ""
     private var selectedDays: Set<Int> = []
     
@@ -149,7 +150,7 @@ final class TrackerCreationViewController: UIViewController {
         return vc
     }()
     
-    // MARK: - Emoji Collection
+    // MARK: - Properties Emoji
     private var selectedEmoji: String = "😊"
     private let emojis: [String] = [
         "😊", "😻", "🌺", "🐶", "❤️", "😱",
@@ -194,7 +195,7 @@ final class TrackerCreationViewController: UIViewController {
         return collectionView
     }()
     
-    // MARK: - Color Collection
+    // MARK: - Properties Color
     private var selectedColor: UIColor = .appTrackerColorBlue
     private let trackerColors: [UIColor] = [
         .appTrackerColorRed,
@@ -254,8 +255,7 @@ final class TrackerCreationViewController: UIViewController {
         return collectionView
     }()
     
-    
-    // MARK: - Buttons
+    // MARK: - Properties Buttons
     private lazy var buttonStackView: UIStackView = {
         let stackView = UIStackView()
         stackView.axis = .horizontal
@@ -288,6 +288,8 @@ final class TrackerCreationViewController: UIViewController {
         return button
     }()
     
+    
+    // MARK: - Init
     init(coreDataManager: CoreDataManagerProtocol,
          trackerStore: TrackerStore?,
          trackerCategoryStore: TrackerCategoryStore?) {
@@ -301,6 +303,7 @@ final class TrackerCreationViewController: UIViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
+    // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
@@ -321,6 +324,7 @@ final class TrackerCreationViewController: UIViewController {
         trackerCreateTextView.delegate = self
     }
     
+    // MARK: - Setup
     private func setupUI() {
         view.backgroundColor = .white
         view.addSubview(tableView)
@@ -794,7 +798,7 @@ extension TrackerCreationViewController: CategoryViewControllerDelegate {
     }
 }
 
-// MARK: - UICollectionViewDataSource
+// MARK: - Extension
 extension TrackerCreationViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         if collectionView == emojiCollectionView {

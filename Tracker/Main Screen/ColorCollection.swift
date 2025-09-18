@@ -6,7 +6,6 @@ final class ColorCollectionViewCell: UICollectionViewCell {
     static let identifier = "ColorCollectionViewCell"
     var onTap: (() -> Void)?
     
-    // MARK: - UI Elements
     private let colorRect: UIView = {
         let view = UIView()
         view.backgroundColor = UIColor(resource: .appLightGray)
@@ -25,7 +24,7 @@ final class ColorCollectionViewCell: UICollectionViewCell {
         return view
     }()
     
-    // MARK: - Initialization
+    // MARK: - Init
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupUI()

@@ -3,6 +3,7 @@ import CoreData
 
 protocol CoreDataManagerProtocol {
     var viewContext: NSManagedObjectContext { get }
+    
     func saveContext()
     func fetch<T: NSManagedObject>(_ request: NSFetchRequest<T>) -> [T]
     func delete(_ object: NSManagedObject)
@@ -10,6 +11,7 @@ protocol CoreDataManagerProtocol {
 
 final class CoreDataManager: CoreDataManagerProtocol {
     
+    // MARK: - Properties
     private let persistentContainer: NSPersistentContainer
     
     var viewContext: NSManagedObjectContext {

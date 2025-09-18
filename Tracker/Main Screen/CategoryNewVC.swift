@@ -6,6 +6,7 @@ protocol CategoryNewViewControllerDelegate: AnyObject {
 
 final class CategoryNewViewController: UIViewController {
     
+    // MARK: - Properties
     weak var delegate: CategoryNewViewControllerDelegate?
     
     private lazy var categoryTextField: UITextField = {
@@ -44,13 +45,14 @@ final class CategoryNewViewController: UIViewController {
         return button
     }()
     
+    // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
         setupNavigationBar()
         setupTapGesture()
     }
-    
+    // MARK: - Setup
     private func setupUI() {
         view.backgroundColor = .white
         
@@ -115,7 +117,7 @@ final class CategoryNewViewController: UIViewController {
     }
 }
 
-// MARK: - UITextFieldDelegate
+// MARK: - Extension
 extension CategoryNewViewController: UITextFieldDelegate {
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()

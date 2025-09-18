@@ -1,32 +1,9 @@
 import UIKit
 import CoreData
 
-protocol TrackerStoreDelegate: AnyObject {
-    func store(_ store: TrackerStore, didUpdate update: TrackerStoreUpdate)
-}
-
-struct TrackerStoreUpdate {
-    struct Move: Hashable {
-        let oldIndex: Int
-        let newIndex: Int
-    }
-    let insertedIndexes: IndexSet
-    let deletedIndexes: IndexSet
-    let updatedIndexes: IndexSet
-    let movedIndexes: Set<Move>
-}
-
-enum TrackerStoreError: Error {
-    case decodingErrorInvalidColor
-    case decodingErrorInvalidId
-    case decodingErrorInvalidEmoji
-    case decodingErrorInvalidName
-    case decodingErrorInvalidSchedule
-    case trackerNotFound
-}
-
 final class TrackerStore: NSObject {
     
+    // MARK: - Properties
     private let context: NSManagedObjectContext
     
     private var fetchedResultsController: NSFetchedResultsController<TrackerCoreData>?
@@ -36,32 +13,14 @@ final class TrackerStore: NSObject {
     private var updatedIndexes: IndexSet?
     private var movedIndexes: Set<TrackerStoreUpdate.Move>?
     
+    // MARK: - Init
     init(context: NSManagedObjectContext) throws {
         self.context = context
         super.init()
         try setupFetchedResultsController()
     }
     
-    private func setupFetchedResultsController() throws {
-        let fetchRequest = TrackerCoreData.fetchRequest()
-        
-        fetchRequest.sortDescriptors = [
-            NSSortDescriptor(key: "category.title", ascending: true),
-            NSSortDescriptor(key: "name", ascending: true)
-        ]
-        
-        let controller = NSFetchedResultsController(
-            fetchRequest: fetchRequest,
-            managedObjectContext: context,
-            sectionNameKeyPath: "category.title",
-            cacheName: nil
-        )
-        
-        controller.delegate = self
-        self.fetchedResultsController = controller
-        try controller.performFetch()
-    }
-    
+    // MARK: - Public Functions
     func fetchTracker() throws -> [Tracker] {
         guard let objects = fetchedResultsController?.fetchedObjects else {
             return []
@@ -92,8 +51,30 @@ final class TrackerStore: NSObject {
             schedule: schedule
         )
     }
+    
+    // MARK: - Private Functions
+    private func setupFetchedResultsController() throws {
+        let fetchRequest = TrackerCoreData.fetchRequest()
+        
+        fetchRequest.sortDescriptors = [
+            NSSortDescriptor(key: "category.title", ascending: true),
+            NSSortDescriptor(key: "name", ascending: true)
+        ]
+        
+        let controller = NSFetchedResultsController(
+            fetchRequest: fetchRequest,
+            managedObjectContext: context,
+            sectionNameKeyPath: "category.title",
+            cacheName: nil
+        )
+        
+        controller.delegate = self
+        self.fetchedResultsController = controller
+        try controller.performFetch()
+    }
 }
 
+// MARK: - Extension
 extension TrackerCoreData {
     var uiColor: UIColor {
         get {
@@ -137,6 +118,7 @@ extension TrackerCoreData {
     }
 }
 
+// MARK: - Extension
 extension TrackerStore: NSFetchedResultsControllerDelegate {
     func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         insertedIndexes = IndexSet()
@@ -191,6 +173,7 @@ extension TrackerStore: NSFetchedResultsControllerDelegate {
     }
 }
 
+// MARK: - Extension
 extension UIColor {
     func toHex() -> String {
         var red: CGFloat = 0

@@ -3,6 +3,7 @@ import UIKit
 
 final class CategoryViewController: UIViewController {
     
+    // MARK: - Properties
     weak var delegate: CategoryViewControllerDelegate?
     var categories: [TrackerCategory] = []
     private var selectedIndex: Int?
@@ -61,6 +62,7 @@ final class CategoryViewController: UIViewController {
         return button
     }()
     
+    // MARK: - Init
     init(trackerCategoryStore: TrackerCategoryStore?) {
         self.trackerCategoryStore = trackerCategoryStore
         super.init(nibName: nil, bundle: nil)
@@ -70,7 +72,7 @@ final class CategoryViewController: UIViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
-    
+    // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
@@ -90,6 +92,7 @@ final class CategoryViewController: UIViewController {
         loadCategoriesFromStore()
     }
     
+    // MARK: - Setup
     private func setupUI() {
         view.backgroundColor = .white
         
@@ -174,7 +177,7 @@ final class CategoryViewController: UIViewController {
     }
 }
 
-// MARK: - CategoryNewViewControllerDelegate
+// MARK: - Extension
 extension CategoryViewController: CategoryNewViewControllerDelegate {
     func didCreateCategory(_ category: TrackerCategory) {
         categories.append(category)
@@ -187,7 +190,7 @@ extension CategoryViewController: CategoryNewViewControllerDelegate {
     }
 }
 
-// MARK: - UITableViewDataSource
+// MARK: - Extension
 extension CategoryViewController: UITableViewDataSource {
     
     func numberOfSections(in tableView: UITableView) -> Int { 1 }
@@ -287,7 +290,7 @@ extension CategoryViewController: UITableViewDataSource {
     }
 }
 
-// MARK: - UITableViewDelegate
+// MARK: - Extension
 extension CategoryViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         UITableView.automaticDimension
