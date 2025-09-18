@@ -1,10 +1,18 @@
 import UIKit
 
 final class SplashViewController: UIViewController {
-
+    
     // MARK: Property
-    private var logoSplashScreen: UIView?
-
+    private let coreDataManager: CoreDataManagerProtocol
+    
+    init(coreDataManager: CoreDataManagerProtocol) {
+        self.coreDataManager = coreDataManager
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     // MARK: Life cycle
     override func viewDidAppear(_ animated: Bool) {
@@ -15,7 +23,7 @@ final class SplashViewController: UIViewController {
             return
         }
         
-        let tabBarController = TabBarController()
+        let tabBarController = TabBarController(coreDataManager: coreDataManager)
         window.rootViewController = tabBarController
     }
     
@@ -23,7 +31,7 @@ final class SplashViewController: UIViewController {
         super.viewDidLoad()
         configSplashView()
     }
-
+    
     // MARK: Private functions
     private func configSplashView() {
         print("SplashView")
@@ -36,7 +44,5 @@ final class SplashViewController: UIViewController {
         view.addSubview(logoImageView)
         logoImageView.centerXAnchor.constraint(equalTo: super.view.centerXAnchor).isActive = true
         logoImageView.centerYAnchor.constraint(equalTo: super.view.centerYAnchor).isActive = true
-        self.logoSplashScreen = logoImageView
     }
 }
-

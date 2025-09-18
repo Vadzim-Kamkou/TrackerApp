@@ -5,7 +5,6 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     // MARK: - Properties
     static let identifier = "TrackerCollectionViewCell"
     
-    // MARK: - UI Elements
     private let backgroundCardView: UIView = {
         let view = UIView()
         view.layer.cornerRadius = 16
@@ -50,12 +49,11 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         return button
     }()
     
-    // MARK: - Private Properties
     private var tracker: Tracker?
     private var isCompleted: Bool = false
     private var completionHandler: ((Bool) -> Void)?
     
-    // MARK: - Initialization
+    // MARK: - Init
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupUI()
@@ -157,10 +155,10 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         if let range = fullText.range(of: "\(days)") {
             let nsRange = NSRange(range, in: fullText)
             attributedString.addAttribute(.font,
-                                        value: Fonts.ysDisplayBold12 ?? UIFont.boldSystemFont(ofSize: 12),
-                                        range: nsRange)
+                                          value: Fonts.ysDisplayBold12 ?? UIFont.boldSystemFont(ofSize: 12),
+                                          range: nsRange)
         }
-           
+        
         counterLabel.attributedText = attributedString 
     }
     
@@ -177,10 +175,10 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
             actionButton.layer.borderWidth = 0
         }
         UIView.transition(with: actionButton,
-                            duration: 0.2,
-                            options: .transitionCrossDissolve,
-                            animations: nil,
-                            completion: nil)
+                          duration: 0.2,
+                          options: .transitionCrossDissolve,
+                          animations: nil,
+                          completion: nil)
     }
     
     // MARK: - Actions
@@ -207,7 +205,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         tracker = nil
         isCompleted = false
         completionHandler = nil
- 
+        
         emojiLabel.text = nil
         titleLabel.text = nil
         titleLabel.attributedText = nil

@@ -6,6 +6,7 @@ protocol ScheduleViewControllerDelegate: AnyObject {
 
 final class ScheduleViewController: UIViewController {
     
+    // MARK: - Properties
     weak var delegate: ScheduleViewControllerDelegate?
     
     private lazy var scheduleWeekdaysListView: UIView = {
@@ -34,6 +35,7 @@ final class ScheduleViewController: UIViewController {
     private var weekdayViews: [UIView] = []
     private var separatorViews: [UIView] = []
     
+    // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
@@ -41,6 +43,7 @@ final class ScheduleViewController: UIViewController {
         createWeekdayItems()
     }
     
+    // MARK: - Setup
     private func setupUI() {
         view.backgroundColor = .white
         
@@ -174,30 +177,5 @@ final class ScheduleViewController: UIViewController {
         let selectedString = getSelectedDaysString()
         delegate?.didSelectDays(selectedDays, daysString: selectedString)
         dismiss(animated: true)
-    }
-}
-
-// MARK: - UITableViewDataSource
-extension ScheduleViewController: UITableViewDataSource {
-    
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return weekdays.count
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
-        
-        cell.textLabel?.text = weekdays[indexPath.row]
-        cell.textLabel?.font = Fonts.ysDisplayMedium16 ?? UIFont.systemFont(ofSize: 16)
-        cell.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
-        
-        // Добавляем toggle
-        let toggle = UISwitch()
-        toggle.isOn = selectedDays.contains(indexPath.row)
-        toggle.addTarget(self, action: #selector(toggleChanged(_:)), for: .valueChanged)
-        toggle.tag = indexPath.row
-        cell.accessoryView = toggle
-        
-        return cell
     }
 }
