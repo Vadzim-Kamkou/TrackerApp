@@ -8,6 +8,7 @@ struct Fonts {
     static let ysDisplayMedium10 = UIFont(name: ysDisplayMediumFontName, size: 10)
     
     static let ysDisplayBoldFontName = "YSDisplay-Bold"
+    static let ysDisplayBold32 = UIFont(name: ysDisplayBoldFontName, size: 32)
     static let ysDisplayBold34 = UIFont(name: ysDisplayBoldFontName, size: 34)
     static let ysDisplayBold19 = UIFont(name: ysDisplayBoldFontName, size: 19)
     static let ysDisplayBold12 = UIFont(name: ysDisplayBoldFontName, size: 12)
