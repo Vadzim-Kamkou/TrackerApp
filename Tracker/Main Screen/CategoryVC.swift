@@ -1,15 +1,10 @@
 import UIKit
 
-
 final class CategoryViewController: UIViewController {
     
     // MARK: - Properties
     weak var delegate: CategoryViewControllerDelegate?
-    var categories: [TrackerCategory] = []
-    private var selectedIndex: Int?
-    var preselectedTitle: String?
-    
-    private let trackerCategoryStore: TrackerCategoryStore?
+    private var viewModel: CategoryViewModelProtocol
     
     private lazy var tableView: UITableView = {
         let tv = UITableView(frame: .zero, style: .plain)
@@ -17,7 +12,7 @@ final class CategoryViewController: UIViewController {
         tv.separatorStyle   = .none
         tv.dataSource = self
         tv.delegate   = self
-        tv.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")
+        tv.register(CategoryTableViewCell.self, forCellReuseIdentifier: CategoryTableViewCell.identifier)
         tv.translatesAutoresizingMaskIntoConstraints = false
         return tv
     }()
@@ -64,8 +59,13 @@ final class CategoryViewController: UIViewController {
     
     // MARK: - Init
     init(trackerCategoryStore: TrackerCategoryStore?) {
-        self.trackerCategoryStore = trackerCategoryStore
+        self.viewModel = CategoryViewModel(trackerCategoryStore: trackerCategoryStore)
         super.init(nibName: nil, bundle: nil)
+    }
+    
+    convenience init(viewModel: CategoryViewModelProtocol) {
+        self.init(trackerCategoryStore: nil)
+        self.viewModel = viewModel
     }
     
     required init?(coder: NSCoder) {
@@ -77,19 +77,13 @@ final class CategoryViewController: UIViewController {
         super.viewDidLoad()
         setupUI()
         setupNavigationBar()
-        loadCategoriesFromStore()
-        
-        if let title = preselectedTitle {
-            selectedIndex = categories.firstIndex { $0.title == title }
-        }
-        
-        updateUI()
+        setupBindings()
+        viewModel.loadCategories()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
-        loadCategoriesFromStore()
+        viewModel.loadCategories()
     }
     
     // MARK: - Setup
@@ -136,27 +130,31 @@ final class CategoryViewController: UIViewController {
         title = "Категория"
     }
     
-    private func loadCategoriesFromStore() {
-        guard let trackerCategoryStore = trackerCategoryStore else {
-            print("TrackerCategoryStore is not available for category loading")
-            return
+    // MARK: - MVVM
+    private func setupBindings() {
+        viewModel.onCategoriesUpdated = { [weak self] in
+            DispatchQueue.main.async {
+                self?.tableView.reloadData()
+            }
         }
         
-        do {
-            let loadedCategories = try trackerCategoryStore.fetchTrackerCategory()
-            self.categories = loadedCategories
-            print("Loaded \(loadedCategories.count) categories for TrackerCreationVC")
-        } catch {
-            print("Failed to load categories in TrackerCreationVC: \(error)")
+        viewModel.onEmptyStateChanged = { [weak self] isEmpty in
+            DispatchQueue.main.async {
+                self?.emptyStateView.isHidden = !isEmpty
+                self?.tableView.isHidden = isEmpty
+            }
+        }
+        
+        viewModel.onError = { errorMessage in
+            DispatchQueue.main.async {
+                print("Ошибка в CategoryViewController: \(errorMessage)")
+            }
         }
     }
     
-    private func updateUI() {
-        emptyStateView.isHidden = !categories.isEmpty
-        tableView.isHidden = categories.isEmpty
-        if categories.isEmpty {
-            tableView.reloadData()
-        }
+    // MARK: - Public Methods
+    func setPreselectedCategory(title: String?) {
+        viewModel.setPreselectedCategory(title: title)
     }
     
     @objc private func addCategoryTapped() {
@@ -166,133 +164,56 @@ final class CategoryViewController: UIViewController {
         present(navigationController, animated: true)
         
     }
-    
-    @objc private func categoryRowTapped(_ gr: UITapGestureRecognizer) {
-        guard let row = gr.view else { return }
-        selectedIndex = row.tag
-        tableView.reloadData()
-        let chosen = categories[row.tag]
-        delegate?.didSelectCategory(chosen)
-        dismiss(animated: true)
-    }
 }
 
-// MARK: - Extension
+// MARK: - Extension VC Delegate
 extension CategoryViewController: CategoryNewViewControllerDelegate {
     func didCreateCategory(_ category: TrackerCategory) {
-        categories.append(category)
-        selectedIndex = categories.count - 1
-        updateUI()
-        tableView.reloadData()
+        viewModel.addCategory(category)
         
-        delegate?.didSelectCategory(category)
+        if let selectedCategory = viewModel.getSelectedCategory() {
+            delegate?.didSelectCategory(selectedCategory)
+        }
         dismiss(animated: true)
     }
 }
 
-// MARK: - Extension
+// MARK: - Extension Table DataSource
 extension CategoryViewController: UITableViewDataSource {
-    
-    func numberOfSections(in tableView: UITableView) -> Int { 1 }
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int { 1 }
-    
-    func tableView(_ tv: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tv.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
-        cell.backgroundColor = .clear
-        
-        let listView = UIView()
-        listView.backgroundColor = .appBackgroundDay
-        listView.layer.cornerRadius = 16
-        listView.translatesAutoresizingMaskIntoConstraints = false
-        
-        cell.contentView.subviews.forEach { $0.removeFromSuperview() }
-        cell.contentView.addSubview(listView)
-        
-        NSLayoutConstraint.activate([
-            listView.topAnchor.constraint(equalTo: cell.contentView.topAnchor),
-            listView.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor),
-            listView.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor),
-            listView.bottomAnchor.constraint(equalTo: cell.contentView.bottomAnchor)
-        ])
-        
-        addCategorySubviews(into: listView)
-        return cell
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return viewModel.getCategoriesCount()
     }
     
-    private func addCategorySubviews(into parent: UIView) {
-        parent.subviews.forEach { $0.removeFromSuperview() }
-        var previous: UIView?
-        for (idx, category) in categories.enumerated() {
-            let row = makeCategoryRow(title: category.title, index: idx)
-            parent.addSubview(row)
-            
-            NSLayoutConstraint.activate([
-                row.leadingAnchor.constraint(equalTo: parent.leadingAnchor),
-                row.trailingAnchor.constraint(equalTo: parent.trailingAnchor),
-                row.heightAnchor.constraint(equalToConstant: 75)
-            ])
-            
-            if let prev = previous {
-                row.topAnchor.constraint(equalTo: prev.bottomAnchor).isActive = true
-            } else {
-                row.topAnchor.constraint(equalTo: parent.topAnchor).isActive = true
-            }
-            
-            if idx < categories.count - 1 {
-                let sep = UIView()
-                sep.backgroundColor = .systemGray4
-                sep.translatesAutoresizingMaskIntoConstraints = false
-                parent.addSubview(sep)
-                
-                NSLayoutConstraint.activate([
-                    sep.leadingAnchor.constraint(equalTo: parent.leadingAnchor, constant: 16),
-                    sep.trailingAnchor.constraint(equalTo: parent.trailingAnchor, constant: -16),
-                    sep.topAnchor.constraint(equalTo: row.bottomAnchor),
-                    sep.heightAnchor.constraint(equalToConstant: 0.5)
-                ])
-                
-                previous = sep
-            } else {
-                previous = row
-            }
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        guard let cell = tableView.dequeueReusableCell(
+            withIdentifier: CategoryTableViewCell.identifier,
+            for: indexPath
+        ) as? CategoryTableViewCell else {
+            return UITableViewCell()
         }
-        previous?.bottomAnchor.constraint(equalTo: parent.bottomAnchor).isActive = true
-    }
-    
-    private func makeCategoryRow(title: String, index: Int) -> UIView {
-        let view = UIView()
-        view.translatesAutoresizingMaskIntoConstraints = false
-        let label = UILabel()
-        label.text = title
-        label.font = Fonts.ysDisplayMedium16 ?? .systemFont(ofSize: 16)
-        label.textColor = .appBlack
-        label.translatesAutoresizingMaskIntoConstraints = false
-        let icon  = UIImageView(image: UIImage(resource: .check))
-        icon.isHidden = selectedIndex != index
-        icon.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(label)
-        view.addSubview(icon)
         
-        NSLayoutConstraint.activate([
-            label.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            label.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            icon.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            icon.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            icon.widthAnchor.constraint(equalToConstant: 24),
-            icon.heightAnchor.constraint(equalToConstant: 24)
-        ])
+        let title = viewModel.getCategoryTitle(at: indexPath.row)
+        let isSelected = viewModel.isSelected(at: indexPath.row)
+        let isLast = indexPath.row == viewModel.getCategoriesCount() - 1
         
-        view.tag = index
-        let tap = UITapGestureRecognizer(target: self, action: #selector(categoryRowTapped(_:)))
-        view.addGestureRecognizer(tap)
+        cell.configure(title: title, isSelected: isSelected, isLast: isLast)
         
-        return view
+        return cell
     }
 }
 
-// MARK: - Extension
+// MARK: - Extension Table Delegate
 extension CategoryViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        UITableView.automaticDimension
+        return 75
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        viewModel.selectCategory(at: indexPath.row)
+        
+        if let selectedCategory = viewModel.getSelectedCategory() {
+            delegate?.didSelectCategory(selectedCategory)
+        }
+        dismiss(animated: true)
     }
 }

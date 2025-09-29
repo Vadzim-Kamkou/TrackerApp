@@ -89,6 +89,7 @@ final class OnboardingViewController: UIPageViewController {
     }
     
     @objc private func skipButtonTapped() {
+        UserDefaults.standard.set(true, forKey: "OnboardingCompleted")
         navigateToMainApp()
     }
     

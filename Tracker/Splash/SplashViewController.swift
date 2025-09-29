@@ -8,7 +8,7 @@ final class SplashViewController: UIViewController {
     
     init(coreDataManager: CoreDataManagerProtocol) {
         self.coreDataManager = coreDataManager
-        showOnboardingPageController = true
+        showOnboardingPageController = !UserDefaults.standard.bool(forKey: "OnboardingCompleted")
         super.init(nibName: nil, bundle: nil)
     }
     

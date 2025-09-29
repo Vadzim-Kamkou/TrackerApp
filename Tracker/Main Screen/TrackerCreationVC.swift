@@ -498,7 +498,7 @@ final class TrackerCreationViewController: UIViewController {
         
         let categoryVC = CategoryViewController(trackerCategoryStore: trackerCategoryStore)
         categoryVC.delegate = self
-        categoryVC.preselectedTitle = chosenCategoryTitle
+        categoryVC.setPreselectedCategory(title: chosenCategoryTitle)
         let navigationController = UINavigationController(rootViewController: categoryVC)
         present(navigationController, animated: true)
     }

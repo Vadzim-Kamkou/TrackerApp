@@ -380,7 +380,7 @@ extension TrackerViewController: UICollectionViewDelegate {
         do {
             if completed {
                 let record = TrackerRecord(id: tracker.id, date: currentDate)
-                try trackerRecordStore.addTrackerRecord(record)
+                trackerRecordStore.addTrackerRecord(record)
                 completedTrackers.insert(key)
             } else {
                 try trackerRecordStore.deleteTrackerRecord(with: tracker.id, on: currentDate)
