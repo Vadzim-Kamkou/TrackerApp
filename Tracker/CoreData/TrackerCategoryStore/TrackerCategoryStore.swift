@@ -158,26 +158,6 @@ final class TrackerCategoryStore: NSObject {
         
         return container.viewContext
     }
-
-    private func categoryExists(with title: String) throws -> Bool {
-        let fetchRequest: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
-        fetchRequest.predicate = NSPredicate(format: "title == %@", title)
-        fetchRequest.fetchLimit = 1
-        
-        let count = try context.count(for: fetchRequest)
-        return count > 0
-    }
-}
-
-// MARK: - Extension
-extension TrackerCategoryCoreData {
-    func toTrackerCategory() -> TrackerCategory {
-        let trackersArray = (trackers?.allObjects as? [TrackerCoreData])?.map { $0.toTracker() } ?? []
-        return TrackerCategory(
-            title: title ?? "",
-            trackers: trackersArray
-        )
-    }
 }
 
 // MARK: - Extension NSFetchedResultsControllerDelegate

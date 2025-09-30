@@ -4,9 +4,11 @@ final class SplashViewController: UIViewController {
     
     // MARK: Property
     private let coreDataManager: CoreDataManagerProtocol
+    private var showOnboardingPageController: Bool
     
     init(coreDataManager: CoreDataManagerProtocol) {
         self.coreDataManager = coreDataManager
+        showOnboardingPageController = !UserDefaults.standard.bool(forKey: "OnboardingCompleted")
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -23,8 +25,13 @@ final class SplashViewController: UIViewController {
             return
         }
         
-        let tabBarController = TabBarController(coreDataManager: coreDataManager)
-        window.rootViewController = tabBarController
+        if showOnboardingPageController {
+            let onboardingViewController = OnboardingViewController(coreDataManager: coreDataManager)
+            window.rootViewController = onboardingViewController
+        } else {
+            let tabBarController = TabBarController(coreDataManager: coreDataManager)
+            window.rootViewController = tabBarController
+        }
     }
     
     override func viewDidLoad() {
