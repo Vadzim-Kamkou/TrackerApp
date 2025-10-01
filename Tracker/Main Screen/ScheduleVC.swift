@@ -20,7 +20,7 @@ final class ScheduleViewController: UIViewController {
     
     private lazy var saveButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Готово", for: .normal)
+        button.setTitle(NSLocalizedString("done", comment: "Done button"), for: .normal)
         button.titleLabel?.font = Fonts.ysDisplayMedium16 ?? UIFont.systemFont(ofSize: 16, weight: .medium)
         button.backgroundColor = .appBlack
         button.setTitleColor(.white, for: .normal)
@@ -29,8 +29,24 @@ final class ScheduleViewController: UIViewController {
         return button
     }()
     
-    private let weekdays = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"]
-    private let weekdayShortNames = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"]
+    private let weekdays = [
+        NSLocalizedString("monday", comment: "Monday"),
+        NSLocalizedString("tuesday", comment: "Tuesday"),
+        NSLocalizedString("wednesday", comment: "Wednesday"),
+        NSLocalizedString("thursday", comment: "Thursday"),
+        NSLocalizedString("friday", comment: "Friday"),
+        NSLocalizedString("saturday", comment: "Saturday"),
+        NSLocalizedString("sunday", comment: "Sunday")
+    ]
+    private let weekdayShortNames = [
+        NSLocalizedString("mon", comment: "Mon"),
+        NSLocalizedString("tue", comment: "Tue"),
+        NSLocalizedString("wed", comment: "Wed"),
+        NSLocalizedString("thu", comment: "Thu"),
+        NSLocalizedString("fri", comment: "Fri"),
+        NSLocalizedString("sat", comment: "Sat"),
+        NSLocalizedString("sun", comment: "Sun")
+    ]
     private var selectedDays: Set<Int> = []
     private var weekdayViews: [UIView] = []
     private var separatorViews: [UIView] = []
@@ -77,7 +93,7 @@ final class ScheduleViewController: UIViewController {
         
         navigationController?.navigationBar.standardAppearance = appearance
         navigationController?.navigationBar.scrollEdgeAppearance = appearance
-        title = "Расписание"
+        title = NSLocalizedString("schedule", comment: "Schedule screen title")
     }
     
     private func createWeekdayItems() {
@@ -159,7 +175,7 @@ final class ScheduleViewController: UIViewController {
         if selectedDayNames.isEmpty {
             return ""
         } else if selectedDayNames.count == 7 {
-            return "Каждый день"
+            return NSLocalizedString("every_day", comment: "Every day text")
         } else {
             return selectedDayNames.joined(separator: ", ")
         }

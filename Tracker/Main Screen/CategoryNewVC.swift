@@ -11,7 +11,7 @@ final class CategoryNewViewController: UIViewController {
     
     private lazy var categoryTextField: UITextField = {
         let textField = UITextField()
-        textField.placeholder = "Введите название категории"
+        textField.placeholder = NSLocalizedString("enter_category_name", comment: "New category") 
         textField.font = Fonts.ysDisplayMedium17 ?? UIFont.systemFont(ofSize: 17, weight: .medium)
         textField.textColor = .appBlack
         textField.backgroundColor = .appBackgroundDay
@@ -35,7 +35,7 @@ final class CategoryNewViewController: UIViewController {
     
     private lazy var doneButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Готово", for: .normal)
+        button.setTitle(NSLocalizedString("done", comment: "Done"), for: .normal)
         button.titleLabel?.font = Fonts.ysDisplayMedium16 ?? UIFont.systemFont(ofSize: 16, weight: .medium)
         button.backgroundColor = .appGray
         button.setTitleColor(.white, for: .normal)
@@ -87,7 +87,7 @@ final class CategoryNewViewController: UIViewController {
         
         navigationController?.navigationBar.standardAppearance = appearance
         navigationController?.navigationBar.scrollEdgeAppearance = appearance
-        title = "Новая категория"
+        title = NSLocalizedString("new_category", comment: "New category")
     }
     
     private func setupTapGesture() {

@@ -26,14 +26,14 @@ final class TabBarController: UITabBarController {
         ]
         
         trackerVC.tabBarItem = UITabBarItem(
-            title: "Трекеры",
+            title: NSLocalizedString("trackers", comment: "Trackers tab title"),
             image: UIImage(resource: .tapBarTrackerIconPassive),
             selectedImage: UIImage(resource: .tapBarTrackerIconActive)
         )
         trackerVC.tabBarItem.setTitleTextAttributes(attributes, for: .normal)
         
         statisticsVC.tabBarItem = UITabBarItem(
-            title: "Статистика",
+            title: NSLocalizedString("statistics", comment: "Statistics tab title"),
             image: UIImage(resource: .tapBarStatisticsPassive),
             selectedImage: UIImage(resource: .tapBarStatisticsActive)
         )

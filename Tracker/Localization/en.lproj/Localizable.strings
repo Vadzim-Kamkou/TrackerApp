@@ -1,0 +1,55 @@
+/* Main Titles */
+"trackers" = "Trackers";
+"statistics" = "Statistics";
+"new_habit" = "New Tracker";
+"category" = "Category";
+"new_category" = "New Category";
+"schedule" = "Schedule";
+
+/* Buttons */
+"done" = "Done";
+"create" = "Create";
+"cancel" = "Cancel";
+"add_category" = "Add Category";
+"onboarding_button" = "That's technology!";
+"ok" = "OK";
+
+/* Placeholders*/
+"search" = "Search";
+"enter_tracker_name" = "Enter tracker name";
+"enter_category_name" = "Enter category name";
+
+/* Messages */
+"what_to_track" = "What will we track?";
+"habits_events_description" = "Habits and events can be\ncombined by meaning";
+"character_limit" = "38 character limit";
+"onboarding_title_1" = "Track only what you want";
+"onboarding_title_2" = "Even if it's not liters of water and charging";
+
+/* Sections */
+"emoji" = "Emoji";
+"color" = "Color";
+
+/* Weekdays */
+"monday" = "Monday";
+"tuesday" = "Tuesday";
+"wednesday" = "Wednesday";
+"thursday" = "Thursday";
+"friday" = "Friday";
+"saturday" = "Saturday";
+"sunday" = "Sunday";
+
+"mon" = "Mon";
+"tue" = "Tue";
+"wed" = "Wed";
+"thu" = "Thu";
+"fri" = "Fri";
+"sat" = "Sat";
+"sun" = "Sun";
+
+"every_day" = "Every day";
+
+/* Errors */
+"error" = "Error";
+"tracker_save_error" = "Tracker saving error";
+"category_load_error" = "Category loading error: %@";

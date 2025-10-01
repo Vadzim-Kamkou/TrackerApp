@@ -27,7 +27,9 @@ final class TrackerCreationViewController: UIViewController {
     // MARK: - Properties Tracker
     private let trackerCreateTextViewMaxCharacters = 38
     private var isOverLimitTextView = false
-    private let trackerCreateTextViewDefaultText = "Введите название трекера"
+    private var trackerCreateTextViewDefaultText: String {
+        return NSLocalizedString("enter_tracker_name", comment: "Enter tracker name placeholder")
+    }
     
     private lazy var trackerCreateTextView: UITextView = {
         let textView = UITextView()
@@ -82,7 +84,7 @@ final class TrackerCreationViewController: UIViewController {
         firstItemView.translatesAutoresizingMaskIntoConstraints = false
         
         let firstTitleLabel = UILabel()
-        firstTitleLabel.text = "Категория"
+        firstTitleLabel.text = NSLocalizedString("category", comment: "Category label")
         firstTitleLabel.font = Fonts.ysDisplayMedium17 ?? UIFont.systemFont(ofSize: 17)
         firstTitleLabel.textColor = .appBlack
         
@@ -160,7 +162,7 @@ final class TrackerCreationViewController: UIViewController {
     
     private lazy var emojiHeaderLabel: UILabel = {
         let label = UILabel()
-        label.text = "Emoji"
+        label.text = NSLocalizedString("emoji", comment: "Emoji section title")
         label.font = Fonts.ysDisplayBold19 ?? UIFont.boldSystemFont(ofSize: 19)
         label.textColor = .appBlack
         label.textAlignment = .left
@@ -220,7 +222,7 @@ final class TrackerCreationViewController: UIViewController {
     
     private lazy var colorHeaderLabel: UILabel = {
         let label = UILabel()
-        label.text = "Цвет"
+        label.text = NSLocalizedString("color", comment: "Color section title")
         label.font = Fonts.ysDisplayBold19 ?? UIFont.boldSystemFont(ofSize: 19)
         label.textColor = .appBlack
         label.textAlignment = .left
@@ -266,7 +268,7 @@ final class TrackerCreationViewController: UIViewController {
     
     private lazy var trackerCreationCancelButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Отмена", for: .normal)
+        button.setTitle(NSLocalizedString("cancel", comment: "Cancel button"), for: .normal)
         button.titleLabel?.font = Fonts.ysDisplayMedium16 ?? UIFont.systemFont(ofSize: 16, weight: .medium)
         button.backgroundColor = .white
         button.setTitleColor(.appRed, for: .normal)
@@ -279,7 +281,7 @@ final class TrackerCreationViewController: UIViewController {
     
     private lazy var trackerCreationCreateButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Создать", for: .normal)
+        button.setTitle(NSLocalizedString("create", comment: "Create button"), for: .normal)
         button.titleLabel?.font = Fonts.ysDisplayMedium16 ?? UIFont.systemFont(ofSize: 16, weight: .medium)
         button.backgroundColor = .appGray
         button.setTitleColor(.white, for: .normal)
@@ -364,7 +366,7 @@ final class TrackerCreationViewController: UIViewController {
         
         navigationController?.navigationBar.standardAppearance = appearance
         navigationController?.navigationBar.scrollEdgeAppearance = appearance
-        title = "Новая привычка"
+        title = NSLocalizedString("new_habit", comment: "New habit screen title")
     }
     
     private func createTrackerSettingsSchedule() -> UIView {
@@ -373,7 +375,7 @@ final class TrackerCreationViewController: UIViewController {
         view.translatesAutoresizingMaskIntoConstraints = false
         
         let label = UILabel()
-        label.text = "Расписание"
+        label.text = NSLocalizedString("schedule", comment: "Schedule label")
         label.font = Fonts.ysDisplayMedium17 ?? UIFont.systemFont(ofSize: 17)
         label.textColor = .appBlack
         view.addSubview(label)
@@ -464,14 +466,14 @@ final class TrackerCreationViewController: UIViewController {
         } catch {
             print("Failed to save tracker: \(error)")
             DispatchQueue.main.async { [weak self] in
-                self?.showErrorAlert("Ошибка сохранения трекера")
+                self?.showErrorAlert(NSLocalizedString("tracker_save_error", comment: "Tracker save error"))
             }
         }
     }
     
     private func showErrorAlert(_ message: String) {
-        let alert = UIAlertController(title: "Ошибка", message: message, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        let alert = UIAlertController(title: NSLocalizedString("error", comment: "Error title"), message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: NSLocalizedString("ok", comment: "OK button"), style: .default))
         present(alert, animated: true)
     }
     
@@ -703,7 +705,7 @@ extension TrackerCreationViewController: UITableViewDelegate {
             footerView.backgroundColor = .clear
             
             let label = UILabel()
-            label.text = "Ограничение 38 символов"
+            label.text = NSLocalizedString("character_limit", comment: "Character limit message")
             label.font = Fonts.ysDisplayMedium17 ?? UIFont.systemFont(ofSize: 17, weight: .regular)
             label.textColor = UIColor(resource: .appRed)
             label.textAlignment = .center

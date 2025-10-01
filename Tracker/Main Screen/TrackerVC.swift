@@ -130,7 +130,7 @@ final class TrackerViewController: UIViewController {
         view.addGestureRecognizer(tapGesture)
         
         let trackerTitleLabel = UILabel()
-        trackerTitleLabel.text = "Трекеры"
+        trackerTitleLabel.text = NSLocalizedString("trackers", comment: "Main trackers title")
         trackerTitleLabel.font = Fonts.ysDisplayBold34 ?? UIFont.systemFont(ofSize: 34)
         trackerTitleLabel.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(trackerTitleLabel)
@@ -139,7 +139,7 @@ final class TrackerViewController: UIViewController {
         let trackerSearchBar = UISearchBar()
         trackerSearchBar.translatesAutoresizingMaskIntoConstraints = false
         trackerSearchBar.searchBarStyle = .minimal
-        trackerSearchBar.placeholder = "Поиск"
+        trackerSearchBar.placeholder = NSLocalizedString("search", comment: "Search placeholder")
         view.addSubview(trackerSearchBar)
         self.trackerSearchBar = trackerSearchBar
         
@@ -169,7 +169,7 @@ final class TrackerViewController: UIViewController {
         view.addSubview(noTrackerImageView)
         
         let trackerLabel = UILabel()
-        trackerLabel.text = "Что будем отслеживать?"
+        trackerLabel.text = NSLocalizedString("what_to_track", comment: "Empty state message")
         trackerLabel.font = Fonts.ysDisplayMedium12 ?? UIFont.systemFont(ofSize: 12)
         trackerLabel.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(trackerLabel)
