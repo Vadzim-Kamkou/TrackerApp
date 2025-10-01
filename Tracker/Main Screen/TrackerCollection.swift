@@ -132,34 +132,18 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     }
     
     private func updateCounterText(_ days: Int) {
-        let daysText: String
-        let lastDigit = days % 10
-        let lastTwoDigits = days % 100
-        
-        if lastTwoDigits >= 11 && lastTwoDigits <= 14 {
-            daysText = "дней"
-        } else {
-            switch lastDigit {
-            case 1:
-                daysText = "день"
-            case 2, 3, 4:
-                daysText = "дня"
-            default:
-                daysText = "дней"
-            }
-        }
-        
-        let fullText = "\(days) \(daysText)"
-        let attributedString = NSMutableAttributedString(string: fullText)
-        
-        if let range = fullText.range(of: "\(days)") {
-            let nsRange = NSRange(range, in: fullText)
+        let localizedString = String.localizedStringWithFormat(
+            NSLocalizedString("days_counter", comment: "Days counter with pluralization"),
+            days
+        )
+        let attributedString = NSMutableAttributedString(string: localizedString)
+        if let range = localizedString.range(of: "\(days)") {
+            let nsRange = NSRange(range, in: localizedString)
             attributedString.addAttribute(.font,
                                           value: Fonts.ysDisplayBold12 ?? UIFont.boldSystemFont(ofSize: 12),
                                           range: nsRange)
         }
-        
-        counterLabel.attributedText = attributedString 
+        counterLabel.attributedText = attributedString
     }
     
     private func updateButtonAppearance() {
