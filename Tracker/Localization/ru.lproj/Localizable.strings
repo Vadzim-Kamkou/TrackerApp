@@ -21,6 +21,11 @@
 "onboarding_button" = "Вот это технологии!";
 "ok" = "OK";
 
+/* Context Menu */
+"edit" = "Редактировать";
+"delete" = "Удалить";
+"delete_confirmation_title" = "Уверены что хотите удалить трекер?";
+
 /* Placeholders*/
 "search" = "Поиск";
 "enter_tracker_name" = "Введите название трекера";

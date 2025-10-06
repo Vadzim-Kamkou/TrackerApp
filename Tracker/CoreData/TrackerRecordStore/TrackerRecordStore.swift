@@ -53,7 +53,6 @@ final class TrackerRecordStore: NSObject {
         if let recordToDelete = records.first {
             context.delete(recordToDelete)
             try context.save()
-            print("Deleted tracker record for tracker \(trackerId) on \(date)")
         }
     }
     
@@ -158,6 +157,19 @@ final class TrackerRecordStore: NSObject {
             return []
         }
     }
+    
+    func deleteAllRecords(for trackerId: UUID) throws {
+          let fetchRequest: NSFetchRequest<TrackerRecordCoreData> = TrackerRecordCoreData.fetchRequest()
+          fetchRequest.predicate = NSPredicate(format: "id == %@", trackerId as CVarArg)
+          
+          let records = try context.fetch(fetchRequest)
+        
+          for record in records {
+              context.delete(record)
+          }
+          
+          try context.save()
+      }
 }
 
 // MARK: - Extension

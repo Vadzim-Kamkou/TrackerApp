@@ -14,6 +14,7 @@ final class TrackerViewController: UIViewController {
             return nil
         }
     }()
+    
     private lazy var trackerCategoryStore: TrackerCategoryStore? = {
         do {
             return try TrackerCategoryStore(context: coreDataManager.viewContext)
@@ -22,6 +23,7 @@ final class TrackerViewController: UIViewController {
             return nil
         }
     }()
+    
     private lazy var trackerRecordStore: TrackerRecordStore? = {
         do {
             return try TrackerRecordStore(context: coreDataManager.viewContext)
@@ -123,7 +125,7 @@ final class TrackerViewController: UIViewController {
         
         loadInitialData()
     }
-
+    
     // MARK: - Setup
     private func setupUI() {
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(donePressed))
@@ -263,9 +265,37 @@ final class TrackerViewController: UIViewController {
     // MARK: - Helper Methods
     private func updateViewVisibility() {
         let hasTrackers = !filteredCategories.isEmpty
-        collectionView.isHidden = !hasTrackers
-        trackerView?.isHidden = hasTrackers
-        trackerLabel?.isHidden = hasTrackers
+        
+        UIView.animate(withDuration: 0.3, animations: { [weak self] in
+            self?.collectionView.alpha = hasTrackers ? 1.0 : 0.0
+            self?.trackerView?.alpha = hasTrackers ? 0.0 : 1.0
+            self?.trackerLabel?.alpha = hasTrackers ? 0.0 : 1.0
+        }, completion: { [weak self] _ in
+            self?.collectionView.isHidden = !hasTrackers
+            self?.trackerView?.isHidden = hasTrackers
+            self?.trackerLabel?.isHidden = hasTrackers
+        })
+    }
+    
+    private func animateTrackerAddition() {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            
+            UIView.transition(with: self.view, duration: 0.3, options: .transitionCrossDissolve) {
+                self.collectionView.reloadData()
+                self.updateViewVisibility()
+            }
+        }
+    }
+    
+    private func animateCollectionViewUpdate() {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            
+            UIView.animate(withDuration: 0.25, animations: {
+                self.collectionView.performBatchUpdates(nil)
+            })
+        }
     }
     
     private func isTrackerCompletedToday(_ tracker: Tracker) -> Bool {
@@ -345,6 +375,8 @@ extension TrackerViewController: UICollectionViewDataSource {
         let isCompleted = isTrackerCompletedToday(tracker)
         let completedDays = getCompletedDaysCount(for: tracker)
         
+        cell.delegate = self
+        
         cell.configure(with: tracker, isCompleted: isCompleted, completedDays: completedDays, currentDate: currentDate) { [weak self] completed in
             self?.handleTrackerCompletion(tracker: tracker, completed: completed)
         }
@@ -396,7 +428,6 @@ extension TrackerViewController: UICollectionViewDelegate {
 // MARK: - Extension
 extension TrackerViewController: TrackerStoreDelegate {
     func store(_ store: TrackerStore, didUpdate update: TrackerStoreUpdate) {
-        print("TrackerStore updated")
         
         DispatchQueue.main.async { [weak self] in
             self?.loadTrackersCategoryFromStore()
@@ -409,7 +440,6 @@ extension TrackerViewController: TrackerStoreDelegate {
 // MARK: - Extension
 extension TrackerViewController: TrackerCategoryStoreDelegate {
     func store(_ store: TrackerCategoryStore, didUpdate update: TrackerCategoryStoreUpdate) {
-        print("TrackerCategoryStore updated")
         
         DispatchQueue.main.async { [weak self] in
             self?.loadTrackersCategoryFromStore()
@@ -465,6 +495,114 @@ extension TrackerViewController: TrackerRecordStoreDelegate {
             
         } catch {
             print("Failed to fetch tracker records: \(error)")
+        }
+    }
+}
+
+extension TrackerViewController: TrackerCellDelegate {
+    func didRequestEdit(for tracker: Tracker) {
+        // TODO: Реализовать редактирование трекера
+        print("Edit tracker: \(tracker.name)")
+        
+        // Пока просто показываем алерт
+        let alert = UIAlertController(
+            title: NSLocalizedString("edit", comment: "Edit tracker"),
+            message: "Редактирование трекера '\(tracker.name)' будет реализовано позже",
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: NSLocalizedString("ok", comment: "OK"), style: .default))
+        present(alert, animated: true)
+    }
+    
+    func didRequestDelete(for tracker: Tracker) {
+        showDeleteConfirmation(for: tracker)
+    }
+    
+    private func showDeleteConfirmation(for tracker: Tracker) {
+        let alert = UIAlertController(
+            title: NSLocalizedString("delete_confirmation_title", comment: "Delete confirmation title"),
+            message: nil,
+            preferredStyle: .actionSheet
+        )
+        
+        let cancelAction = UIAlertAction(
+            title: NSLocalizedString("cancel", comment: "Cancel"),
+            style: .cancel
+        )
+        
+        let deleteAction = UIAlertAction(
+            title: NSLocalizedString("delete", comment: "Delete"),
+            style: .destructive
+        ) { [weak self] _ in
+            self?.deleteTracker(tracker)
+        }
+        
+        alert.addAction(cancelAction)
+        alert.addAction(deleteAction)
+        
+        present(alert, animated: true)
+    }
+    
+    private func deleteTracker(_ tracker: Tracker) {
+        guard let trackerStore = trackerStore,
+              let trackerRecordStore = trackerRecordStore else {
+            showErrorAlert(message: "Ошибка: недоступны хранилища данных")
+            return
+        }
+        
+        do {
+            try trackerRecordStore.deleteAllRecords(for: tracker.id)
+            try trackerStore.deleteTracker(with: tracker.id)
+            
+            removeTrackerFromLocalData(tracker)
+            
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
+                
+                UIView.transition(with: self.collectionView, duration: 0.3, options: .transitionCrossDissolve) {
+                    self.collectionView.reloadData()
+                } completion: { _ in
+                    self.updateViewVisibility()
+                }
+            }
+        } catch {
+            showErrorAlert(message: "Ошибка при удалении трекера: \(error.localizedDescription)")
+        }
+    }
+    
+    
+    private func removeTrackerFromLocalData(_ tracker: Tracker) {
+        for (categoryIndex, category) in categories.enumerated() {
+            if let trackerIndex = category.trackers.firstIndex(where: { $0.id == tracker.id }) {
+                var updatedTrackers = category.trackers
+                updatedTrackers.remove(at: trackerIndex)
+                
+                if updatedTrackers.isEmpty {
+                    categories.remove(at: categoryIndex)
+                } else {
+                    categories[categoryIndex] = TrackerCategory(
+                        title: category.title,
+                        trackers: updatedTrackers
+                    )
+                }
+                break
+            }
+        }
+        
+        completedTrackers = completedTrackers.filter { key in
+            !key.hasPrefix(tracker.id.uuidString)
+        }
+    }
+    
+    private func showErrorAlert(message: String) {
+        DispatchQueue.main.async { [weak self] in
+            let alert = UIAlertController(
+                title: NSLocalizedString("error", comment: "Error"),
+                message: message,
+                preferredStyle: .alert
+            )
+            alert.addAction(UIAlertAction(title: NSLocalizedString("ok", comment: "OK"), style: .default))
+            self?.present(alert, animated: true)
         }
     }
 }

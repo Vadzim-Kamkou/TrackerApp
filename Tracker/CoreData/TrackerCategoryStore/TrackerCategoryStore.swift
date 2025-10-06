@@ -76,11 +76,9 @@ final class TrackerCategoryStore: NSObject {
             trackerCoreData.category = existingCategoryCoreData
             
             try context.save()
-            print("Added tracker '\(tracker.name)' to existing category '\(categoryTitle)'")
         } else {
             let newCategory = TrackerCategory(title: categoryTitle, trackers: [tracker])
             try addTrackerCategory(newCategory)
-            print("Created new category '\(categoryTitle)' with tracker '\(tracker.name)'")
         }
     }
     

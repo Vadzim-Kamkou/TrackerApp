@@ -457,7 +457,6 @@ final class TrackerCreationViewController: UIViewController {
             }
             
             try trackerCategoryStore.addTrackerToCategory(newTracker, categoryTitle: categoryTitle)
-            print("Tracker '\(trackerName)' successfully saved to Core Data")
             
             DispatchQueue.main.async { [weak self] in
                 self?.dismiss(animated: true)

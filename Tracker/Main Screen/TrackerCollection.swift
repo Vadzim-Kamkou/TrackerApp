@@ -1,9 +1,16 @@
 import UIKit
 
+protocol TrackerCellDelegate: AnyObject {
+    func didRequestEdit(for tracker: Tracker)
+    func didRequestDelete(for tracker: Tracker)
+}
+
 final class TrackerCollectionViewCell: UICollectionViewCell {
     
     // MARK: - Properties
     static let identifier = "TrackerCollectionViewCell"
+    
+    weak var delegate: TrackerCellDelegate?
     
     private let backgroundCardView: UIView = {
         let view = UIView()
@@ -57,6 +64,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupUI()
+        setupContextMenu()
     }
     
     required init?(coder: NSCoder) {
@@ -75,6 +83,12 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         setupConstraints()
         setupButtonAction()
     }
+    
+    private func setupContextMenu() {
+           let contextMenuInteraction = UIContextMenuInteraction(delegate: self)
+           backgroundCardView.addInteraction(contextMenuInteraction)
+           backgroundCardView.isUserInteractionEnabled = true
+       }
     
     private func setupConstraints() {
         NSLayoutConstraint.activate([
@@ -189,6 +203,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         tracker = nil
         isCompleted = false
         completionHandler = nil
+        delegate = nil
         
         emojiLabel.text = nil
         titleLabel.text = nil
@@ -200,5 +215,29 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         actionButton.setTitleColor(nil, for: .normal)
         actionButton.isEnabled = true
         actionButton.alpha = 1.0
+    }
+}
+
+// MARK: - UIContextMenuInteractionDelegate
+extension TrackerCollectionViewCell: UIContextMenuInteractionDelegate {
+    func contextMenuInteraction(_ interaction: UIContextMenuInteraction, configurationForMenuAtLocation location: CGPoint) -> UIContextMenuConfiguration? {
+        guard let tracker = tracker else { return nil }
+        
+        return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { _ in
+            let editAction = UIAction(
+                title: NSLocalizedString("edit", comment: "Edit tracker")
+            ) { [weak self] _ in
+                self?.delegate?.didRequestEdit(for: tracker)
+            }
+            
+            let deleteAction = UIAction(
+                title: NSLocalizedString("delete", comment: "Delete tracker"),
+                attributes: .destructive
+            ) { [weak self] _ in
+                self?.delegate?.didRequestDelete(for: tracker)
+            }
+            
+            return UIMenu(title: "", children: [editAction, deleteAction])
+        }
     }
 }

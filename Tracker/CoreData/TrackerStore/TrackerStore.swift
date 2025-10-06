@@ -95,7 +95,20 @@ final class TrackerStore: NSObject {
         }
     }
     
-    
+    func deleteTracker(with id: UUID) throws {
+        let fetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "id == %@", id as CVarArg)
+        fetchRequest.fetchLimit = 1
+        
+        let trackers = try context.fetch(fetchRequest)
+        
+        guard let trackerToDelete = trackers.first else {
+            throw TrackerStoreError.trackerNotFound
+        }
+        
+        context.delete(trackerToDelete)
+        try context.save()
+    }
 }
 
 // MARK: - Extension

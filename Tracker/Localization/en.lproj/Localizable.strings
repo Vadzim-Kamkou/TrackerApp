@@ -21,6 +21,11 @@
 "onboarding_button" = "That's technology!";
 "ok" = "OK";
 
+/* Context Menu */
+"edit" = "Edit";
+"delete" = "Delete";
+"delete_confirmation_title" = "Are you sure you want to delete the tracker?";
+
 /* Placeholders*/
 "search" = "Search";
 "enter_tracker_name" = "Enter tracker name";
