@@ -72,6 +72,30 @@ final class TrackerStore: NSObject {
         self.fetchedResultsController = controller
         try controller.performFetch()
     }
+    
+    func getTrackersForDate(_ date: Date) -> [Tracker] {
+        do {
+            let allTrackers = try fetchTracker()
+            let weekday = Calendar.current.component(.weekday, from: date)
+            
+            let scheduleWeekday: Int
+            if weekday == 1 {
+                scheduleWeekday = 6
+            } else {
+                scheduleWeekday = weekday - 2
+            }
+            
+            return allTrackers.filter { tracker in
+                guard let schedule = tracker.schedule else { return true }
+                return schedule.contains(scheduleWeekday)
+            }
+        } catch {
+            print("Failed to fetch trackers for date: \(error)")
+            return []
+        }
+    }
+    
+    
 }
 
 // MARK: - Extension

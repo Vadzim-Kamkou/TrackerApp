@@ -22,5 +22,25 @@
             <string>%d дней</string>
         </dict>
     </dict>
+    <key>statistics_ideal_days_count</key>
+        <dict>
+            <key>NSStringLocalizedFormatKey</key>
+            <string>%#@ideal_days@</string>
+            <key>ideal_days</key>
+            <dict>
+                <key>NSStringFormatSpecTypeKey</key>
+                <string>NSStringPluralRuleType</string>
+                <key>NSStringFormatValueTypeKey</key>
+                <string>d</string>
+                <key>one</key>
+                <string>Идеальный день</string>
+                <key>few</key>
+                <string>Идеальных дня</string>
+                <key>many</key>
+                <string>Идеальных дней</string>
+                <key>other</key>
+                <string>Идеальных дней</string>
+            </dict>
+        </dict>
 </dict>
 </plist>

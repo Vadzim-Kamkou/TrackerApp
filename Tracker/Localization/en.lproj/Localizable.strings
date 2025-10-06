@@ -6,6 +6,13 @@
 "new_category" = "New Category";
 "schedule" = "Schedule";
 
+/* Statistics */
+"statistics" = "Statistics";
+"statistics_completed_today_percentage" = "Completed today";
+"statistics_completed_7days_percentage" = "7-day average";
+"statistics_ideal_days_count" = "Ideal days";
+"statistics_trackers_completed_count" = "Trackers completed";
+
 /* Buttons */
 "done" = "Done";
 "create" = "Create";
@@ -21,6 +28,7 @@
 
 /* Messages */
 "what_to_track" = "What will we track?";
+"statistics_to_track" = "There is nothing to analyze yet";
 "habits_events_description" = "Habits and events can be\ncombined by meaning";
 "character_limit" = "38 character limit";
 "onboarding_title_1" = "Track only what you want";

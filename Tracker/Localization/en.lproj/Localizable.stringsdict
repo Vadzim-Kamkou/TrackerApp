@@ -18,5 +18,21 @@
             <string>%d days</string>
         </dict>
     </dict>
+    <key>statistics_ideal_days_count</key>
+       <dict>
+           <key>NSStringLocalizedFormatKey</key>
+           <string>%#@ideal_days@</string>
+           <key>ideal_days</key>
+           <dict>
+               <key>NSStringFormatSpecTypeKey</key>
+               <string>NSStringPluralRuleType</string>
+               <key>NSStringFormatValueTypeKey</key>
+               <string>d</string>
+               <key>one</key>
+               <string>Ideal day</string>
+               <key>other</key>
+               <string>Ideal days</string>
+           </dict>
+       </dict>
 </dict>
 </plist>

@@ -175,6 +175,8 @@ final class TrackerViewController: UIViewController {
         view.addSubview(trackerLabel)
         
         NSLayoutConstraint.activate([
+            noTrackerImageView.widthAnchor.constraint(equalToConstant: 80),
+            noTrackerImageView.heightAnchor.constraint(equalToConstant: 80),
             noTrackerImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             noTrackerImageView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             
@@ -194,12 +196,11 @@ final class TrackerViewController: UIViewController {
         let calendar = Calendar.current
         let weekday = calendar.component(.weekday, from: date)
         
-        // Преобразуем Calendar weekday к нашей системе
         let scheduleWeekday: Int
         if weekday == 1 {
-            scheduleWeekday = 6  // Воскресенье = 6
+            scheduleWeekday = 6
         } else {
-            scheduleWeekday = weekday - 2  // Понедельник = 0, и т.д.
+            scheduleWeekday = weekday - 2
         }
         
         let shouldShow = schedule.contains(scheduleWeekday)

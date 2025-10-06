@@ -6,6 +6,13 @@
 "new_category" = "Новая категория";
 "schedule" = "Расписание";
 
+/* Statistics */
+"statistics" = "Статистика";
+"statistics_completed_today_percentage" = "Выполнено сегодня";
+"statistics_completed_7days_percentage" = "Среднее значение за 7 дней";
+"statistics_ideal_days_count" = "Идеальных дней";
+"statistics_trackers_completed_count" = "Трекеров завершено";
+
 /* Buttons */
 "done" = "Готово";
 "create" = "Создать";
@@ -21,6 +28,7 @@
 
 /* Messages */
 "what_to_track" = "Что будем отслеживать?";
+"statistics_to_track" = "Анализировать пока нечего";
 "habits_events_description" = "Привычки и события можно\nобъединить по смыслу";
 "character_limit" = "Ограничение 38 символов";
 "onboarding_title_1" = "Отслеживайте только то, что хотите";
