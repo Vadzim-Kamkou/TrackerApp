@@ -9,6 +9,9 @@
 /* Begin PBXBuildFile section */
 		0D08678E2E9403990023032A /* YandexMobileMetrica in Frameworks */ = {isa = PBXBuildFile; productRef = 0D08678D2E9403990023032A /* YandexMobileMetrica */; };
 		0D0867902E9403990023032A /* YandexMobileMetricaCrashes in Frameworks */ = {isa = PBXBuildFile; productRef = 0D08678F2E9403990023032A /* YandexMobileMetricaCrashes */; };
+		0D0867A62E95553E0023032A /* InlineSnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = 0D0867A52E95553E0023032A /* InlineSnapshotTesting */; };
+		0D0867A82E95553E0023032A /* SnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = 0D0867A72E95553E0023032A /* SnapshotTesting */; };
+		0D0867AA2E95553E0023032A /* SnapshotTestingCustomDump in Frameworks */ = {isa = PBXBuildFile; productRef = 0D0867A92E95553E0023032A /* SnapshotTestingCustomDump */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -79,6 +82,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0D0867AA2E95553E0023032A /* SnapshotTestingCustomDump in Frameworks */,
+				0D0867A62E95553E0023032A /* InlineSnapshotTesting in Frameworks */,
+				0D0867A82E95553E0023032A /* SnapshotTesting in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -165,6 +171,9 @@
 			);
 			name = TrackerTests;
 			packageProductDependencies = (
+				0D0867A52E95553E0023032A /* InlineSnapshotTesting */,
+				0D0867A72E95553E0023032A /* SnapshotTesting */,
+				0D0867A92E95553E0023032A /* SnapshotTestingCustomDump */,
 			);
 			productName = TrackerTests;
 			productReference = 0DCAB8E92DFC3BFA0042955B /* TrackerTests.xctest */;
@@ -228,6 +237,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				0D08678C2E94038C0023032A /* XCRemoteSwiftPackageReference "metrica-sdk-ios" */,
+				0D0867A42E9555200023032A /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 0DCAB8D42DFC3BF80042955B /* Products */;
@@ -614,6 +624,14 @@
 				minimumVersion = 4.5.2;
 			};
 		};
+		0D0867A42E9555200023032A /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/pointfreeco/swift-snapshot-testing";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.18.7;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -626,6 +644,21 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 0D08678C2E94038C0023032A /* XCRemoteSwiftPackageReference "metrica-sdk-ios" */;
 			productName = YandexMobileMetricaCrashes;
+		};
+		0D0867A52E95553E0023032A /* InlineSnapshotTesting */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0D0867A42E9555200023032A /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */;
+			productName = InlineSnapshotTesting;
+		};
+		0D0867A72E95553E0023032A /* SnapshotTesting */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0D0867A42E9555200023032A /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */;
+			productName = SnapshotTesting;
+		};
+		0D0867A92E95553E0023032A /* SnapshotTestingCustomDump */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0D0867A42E9555200023032A /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */;
+			productName = SnapshotTestingCustomDump;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
