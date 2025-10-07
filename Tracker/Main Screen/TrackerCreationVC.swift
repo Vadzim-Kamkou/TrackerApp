@@ -27,7 +27,7 @@ final class TrackerCreationViewController: UIViewController {
         let tableView = UITableView(frame: .zero, style: .grouped)
         tableView.delegate = self
         tableView.dataSource = self
-        tableView.backgroundColor = .white
+        tableView.backgroundColor = .appBackground
         tableView.separatorStyle = .none
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")
         return tableView
@@ -76,7 +76,7 @@ final class TrackerCreationViewController: UIViewController {
     
     private lazy var trackerSettingsListView: UIView = {
         let view = UIView()
-        view.backgroundColor = UIColor.appBackgroundDay
+        view.backgroundColor = .appBackgroundDay
         view.layer.cornerRadius = 16
         view.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner, .layerMinXMaxYCorner, .layerMaxXMaxYCorner]
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -188,7 +188,7 @@ final class TrackerCreationViewController: UIViewController {
         layout.sectionInset = UIEdgeInsets(top: 24, left: sideInset, bottom: 24, right: sideInset)
         
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
-        collectionView.backgroundColor = .white
+        collectionView.backgroundColor = .appBackground
         collectionView.dataSource = self
         collectionView.register(EmojiCollectionViewCell.self, forCellWithReuseIdentifier: EmojiCollectionViewCell.identifier)
         collectionView.translatesAutoresizingMaskIntoConstraints = false
@@ -248,7 +248,7 @@ final class TrackerCreationViewController: UIViewController {
         layout.sectionInset = UIEdgeInsets(top: 24, left: sideInset, bottom: 24, right: sideInset)
         
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
-        collectionView.backgroundColor = .white
+        collectionView.backgroundColor = .appBackground
         collectionView.dataSource = self
         collectionView.register(ColorCollectionViewCell.self, forCellWithReuseIdentifier: ColorCollectionViewCell.identifier)
         collectionView.translatesAutoresizingMaskIntoConstraints = false
@@ -341,7 +341,7 @@ final class TrackerCreationViewController: UIViewController {
     
     // MARK: - Setup
     private func setupUI() {
-        view.backgroundColor = .white
+        view.backgroundColor = .appBackground
         view.addSubview(tableView)
         view.addSubview(buttonStackView)
         
@@ -727,7 +727,7 @@ extension TrackerCreationViewController: UITableViewDataSource {
         cell.contentView.subviews.forEach { $0.removeFromSuperview() }
         
         let containerView = UIView()
-        containerView.backgroundColor = .clear
+        containerView.backgroundColor = .appBackground
         containerView.layer.cornerRadius = 16
         containerView.translatesAutoresizingMaskIntoConstraints = false
         

@@ -27,7 +27,7 @@ final class StatisticsViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .appBackgroundDay
+        view.backgroundColor = .appBackground
         setupUI()
         updateStatisticsViewVisibility()
     }

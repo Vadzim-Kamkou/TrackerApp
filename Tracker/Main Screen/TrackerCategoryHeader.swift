@@ -9,12 +9,14 @@ final class TrackerCategoryHeaderView: UICollectionReusableView {
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.font = Fonts.ysDisplayBold19 ?? UIFont.systemFont(ofSize: 19, weight: .bold)
-        label.textColor = .black
+        label.backgroundColor = .clear 
         label.numberOfLines = 1
         label.lineBreakMode = .byTruncatingTail
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
+    
+
     
     // MARK: - Initialization
     override init(frame: CGRect) {

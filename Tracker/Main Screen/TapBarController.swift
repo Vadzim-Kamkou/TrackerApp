@@ -24,7 +24,8 @@ final class TabBarController: UITabBarController {
         
         let attributes: [NSAttributedString.Key: Any] = [
             .font: Fonts.ysDisplayMedium10 ?? UIFont.systemFont(ofSize: 10),
-            .foregroundColor: UIColor.black
+            .foregroundColor: UIColor(resource: .appBlue)
+
         ]
         
         trackerVC.tabBarItem = UITabBarItem(
@@ -46,7 +47,7 @@ final class TabBarController: UITabBarController {
     
     private func setupTabBarSeparator() {
         let separator = UIView()
-        separator.backgroundColor = .appGray
+        separator.backgroundColor = .appTapBarSeparator
         separator.translatesAutoresizingMaskIntoConstraints = false
         
         tabBar.addSubview(separator)

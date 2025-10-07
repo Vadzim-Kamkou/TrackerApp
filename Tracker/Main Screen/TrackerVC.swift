@@ -129,13 +129,17 @@ final class TrackerViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        view.backgroundColor = .white
+        view.backgroundColor = .appBackground
         setupNavigationBar()
         setupUI()
         setupFilterButton()
         setupCollectionView()
         updateViewVisibility()
         loadSavedFilter()
+        
+        registerForTraitChanges([UITraitUserInterfaceStyle.self]) { [weak self] (traitEnvironment: Self, previousTraitCollection: UITraitCollection) in
+            self?.updateInterfaceForCurrentTheme()
+        }
         
         trackerStore?.delegate = self
         trackerCategoryStore?.delegate = self
@@ -163,6 +167,8 @@ final class TrackerViewController: UIViewController {
         let trackerTitleLabel = UILabel()
         trackerTitleLabel.text = NSLocalizedString("trackers", comment: "Main trackers title")
         trackerTitleLabel.font = Fonts.ysDisplayBold34 ?? UIFont.systemFont(ofSize: 34)
+        trackerTitleLabel.textColor = UIColor(resource: .appTextPrimary)
+
         trackerTitleLabel.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(trackerTitleLabel)
         self.trackerTitleLabel = trackerTitleLabel
@@ -171,6 +177,12 @@ final class TrackerViewController: UIViewController {
         trackerSearchBar.translatesAutoresizingMaskIntoConstraints = false
         trackerSearchBar.searchBarStyle = .minimal
         trackerSearchBar.placeholder = NSLocalizedString("search", comment: "Search placeholder")
+        
+        if let textField = trackerSearchBar.searchTextField as UITextField? {
+            textField.textColor = UIColor(resource: .appTextPrimary)
+            textField.backgroundColor = UIColor(resource: .appLightGray)
+        }
+        
         view.addSubview(trackerSearchBar)
         self.trackerSearchBar = trackerSearchBar
         
@@ -426,7 +438,7 @@ final class TrackerViewController: UIViewController {
     // MARK: - Navigation
     private func setupNavigationBar() {
         let topNavTrackerPlusButton = UIImage(resource: .topNavTrackerPlusButton)
-            .withRenderingMode(.alwaysOriginal)
+        .withRenderingMode(.alwaysTemplate)
         
         navigationItem.leftBarButtonItem = UIBarButtonItem(
             image: topNavTrackerPlusButton,
@@ -434,6 +446,7 @@ final class TrackerViewController: UIViewController {
             target: self,
             action: #selector(openNewScreen)
         )
+        navigationItem.leftBarButtonItem?.tintColor = UIColor(resource: .appTextPrimary)
         navigationItem.rightBarButtonItem = datePickerButton
     }
     
@@ -448,6 +461,21 @@ final class TrackerViewController: UIViewController {
         
         let navigationController = UINavigationController(rootViewController: trackerCreationVC)
         present(navigationController, animated: true)
+    }
+    
+    private func updateInterfaceForCurrentTheme() {
+        view.backgroundColor = UIColor(resource: .appBackground)
+        trackerTitleLabel?.textColor = UIColor(resource: .appTextPrimary)
+        
+        if let searchBar = trackerSearchBar,
+           let textField = searchBar.searchTextField as UITextField? {
+            textField.textColor = UIColor(resource: .appSearchText)
+            textField.backgroundColor = UIColor(resource: .appSearchBackground)
+        }
+        
+        DispatchQueue.main.async { [weak self] in
+            self?.collectionView.reloadData()
+        }
     }
 }
 

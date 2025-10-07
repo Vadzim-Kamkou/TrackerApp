@@ -23,7 +23,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 16)
         label.textAlignment = .center
-        label.backgroundColor = UIColor.white.withAlphaComponent(0.3)
+        label.backgroundColor = UIColor(resource: .appEmojiBackground)
         label.layer.cornerRadius = 12
         label.layer.masksToBounds = true
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -43,7 +43,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     private let counterLabel: UILabel = {
         let label = UILabel()
         label.font = Fonts.ysDisplayMedium12 ?? UIFont.systemFont(ofSize: 12, weight: .medium)
-        label.textColor = .black
+        label.backgroundColor = .clear
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
