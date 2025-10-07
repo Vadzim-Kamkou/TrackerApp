@@ -473,7 +473,6 @@ extension TrackerViewController: TrackerCategoryStoreDelegate {
 // MARK: - Extension
 extension TrackerViewController: TrackerRecordStoreDelegate {
     func store(_ store: TrackerRecordStore, didUpdate update: TrackerRecordStoreUpdate) {
-        print("TrackerRecordStore updated")
         
         DispatchQueue.main.async { [weak self] in
             self?.loadTrackerRecordsFromStore()
@@ -501,17 +500,15 @@ extension TrackerViewController: TrackerRecordStoreDelegate {
 
 extension TrackerViewController: TrackerCellDelegate {
     func didRequestEdit(for tracker: Tracker) {
-        // TODO: Реализовать редактирование трекера
-        print("Edit tracker: \(tracker.name)")
-        
-        // Пока просто показываем алерт
-        let alert = UIAlertController(
-            title: NSLocalizedString("edit", comment: "Edit tracker"),
-            message: "Редактирование трекера '\(tracker.name)' будет реализовано позже",
-            preferredStyle: .alert
+        let editVC = TrackerCreationViewController(
+            mode: .edit(tracker),
+            coreDataManager: coreDataManager,
+            trackerStore: trackerStore,
+            trackerCategoryStore: trackerCategoryStore
         )
-        alert.addAction(UIAlertAction(title: NSLocalizedString("ok", comment: "OK"), style: .default))
-        present(alert, animated: true)
+        
+        let navigationController = UINavigationController(rootViewController: editVC)
+        present(navigationController, animated: true)
     }
     
     func didRequestDelete(for tracker: Tracker) {
@@ -526,12 +523,12 @@ extension TrackerViewController: TrackerCellDelegate {
         )
         
         let cancelAction = UIAlertAction(
-            title: NSLocalizedString("cancel", comment: "Cancel"),
+            title: NSLocalizedString("cancel", comment: ""),
             style: .cancel
         )
         
         let deleteAction = UIAlertAction(
-            title: NSLocalizedString("delete", comment: "Delete"),
+            title: NSLocalizedString("delete", comment: ""),
             style: .destructive
         ) { [weak self] _ in
             self?.deleteTracker(tracker)

@@ -181,6 +181,24 @@ final class ScheduleViewController: UIViewController {
         }
     }
     
+    func setPreselectedDays(_ days: Set<Int>) {
+        selectedDays = days
+        if isViewLoaded {
+            updateToggleStates()
+        }
+    }
+    
+    private func updateToggleStates() {
+        for (index, weekdayView) in weekdayViews.enumerated() {
+            for subview in weekdayView.subviews {
+                if let toggle = subview as? UISwitch, toggle.tag == index {
+                    toggle.isOn = selectedDays.contains(index)
+                    break
+                }
+            }
+        }
+    }
+    
     @objc private func toggleChanged(_ sender: UISwitch) {
         if sender.isOn {
             selectedDays.insert(sender.tag)

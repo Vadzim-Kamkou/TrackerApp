@@ -76,7 +76,7 @@ final class TrackerRecordStore: NSObject {
             date: date
         )
     }
-
+    
     // MARK: - Private Functions
     private func setupFetchedResultsController() throws {
         let fetchRequest = TrackerRecordCoreData.fetchRequest()
@@ -159,17 +159,30 @@ final class TrackerRecordStore: NSObject {
     }
     
     func deleteAllRecords(for trackerId: UUID) throws {
-          let fetchRequest: NSFetchRequest<TrackerRecordCoreData> = TrackerRecordCoreData.fetchRequest()
-          fetchRequest.predicate = NSPredicate(format: "id == %@", trackerId as CVarArg)
-          
-          let records = try context.fetch(fetchRequest)
+        let fetchRequest: NSFetchRequest<TrackerRecordCoreData> = TrackerRecordCoreData.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "id == %@", trackerId as CVarArg)
         
-          for record in records {
-              context.delete(record)
-          }
-          
-          try context.save()
-      }
+        let records = try context.fetch(fetchRequest)
+        
+        for record in records {
+            context.delete(record)
+        }
+        
+        try context.save()
+    }
+    
+    func getCompletedDaysCount(for trackerId: UUID) -> Int {
+        let fetchRequest: NSFetchRequest<TrackerRecordCoreData> = TrackerRecordCoreData.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "id == %@", trackerId as CVarArg)
+        
+        do {
+            let records = try context.fetch(fetchRequest)
+            return records.count
+        } catch {
+            print("Failed to fetch completed days count for tracker \(trackerId): \(error)")
+            return 0
+        }
+    }
 }
 
 // MARK: - Extension

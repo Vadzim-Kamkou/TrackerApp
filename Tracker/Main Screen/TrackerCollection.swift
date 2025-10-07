@@ -237,7 +237,7 @@ extension TrackerCollectionViewCell: UIContextMenuInteractionDelegate {
                 self?.delegate?.didRequestDelete(for: tracker)
             }
             
-            return UIMenu(title: "", children: [editAction, deleteAction])
+            return UIMenu(title: "", options: .displayInline, children: [editAction, deleteAction])
         }
     }
 }

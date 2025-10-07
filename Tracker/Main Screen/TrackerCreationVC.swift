@@ -1,5 +1,10 @@
 import UIKit
 
+enum TrackerMode {
+    case create
+    case edit(Tracker)
+}
+
 protocol CategoryViewControllerDelegate: AnyObject {
     func didSelectCategory(_ category: TrackerCategory)
 }
@@ -11,6 +16,10 @@ final class TrackerCreationViewController: UIViewController {
     
     private let trackerStore: TrackerStore?
     private let trackerCategoryStore: TrackerCategoryStore?
+    
+    private let mode: TrackerMode
+    private var editingTracker: Tracker?
+    private var completedDaysCount: Int = 0
     
     
     // MARK: - Properties Main Table
@@ -144,12 +153,6 @@ final class TrackerCreationViewController: UIViewController {
         view.backgroundColor = UIColor.systemGray4
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
-    }()
-    
-    private lazy var scheduleViewController: ScheduleViewController = {
-        let vc = ScheduleViewController()
-        vc.delegate = self
-        return vc
     }()
     
     // MARK: - Properties Emoji
@@ -292,12 +295,21 @@ final class TrackerCreationViewController: UIViewController {
     
     
     // MARK: - Init
-    init(coreDataManager: CoreDataManagerProtocol,
+    init(mode: TrackerMode = .create,
+         coreDataManager: CoreDataManagerProtocol,
          trackerStore: TrackerStore?,
          trackerCategoryStore: TrackerCategoryStore?) {
+        self.mode = mode
         self.coreDataManager = coreDataManager
         self.trackerStore = trackerStore
         self.trackerCategoryStore = trackerCategoryStore
+        
+        
+        if case .edit(let tracker) = mode {
+            self.editingTracker = tracker
+            self.completedDaysCount = coreDataManager.trackerRecordStore.getCompletedDaysCount(for: tracker.id)
+        }
+        
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -310,6 +322,7 @@ final class TrackerCreationViewController: UIViewController {
         super.viewDidLoad()
         setupUI()
         setupNavigationBar()
+        setupForMode()
         
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
         view.addGestureRecognizer(tapGesture)
@@ -366,7 +379,91 @@ final class TrackerCreationViewController: UIViewController {
         
         navigationController?.navigationBar.standardAppearance = appearance
         navigationController?.navigationBar.scrollEdgeAppearance = appearance
-        title = NSLocalizedString("new_habit", comment: "New habit screen title")
+        
+        switch mode {
+        case .create:
+            title = NSLocalizedString("new_habit", comment: "New habit screen title")
+        case .edit:
+            title = NSLocalizedString("edit_habit", comment: "Edit habit screen title")
+        }
+    }
+    
+    private func setupForMode() {
+        switch mode {
+        case .create:
+            setupTrackerCreationCreateButtonUI()
+        case .edit(let tracker):
+            setupForEditMode(tracker: tracker)
+        }
+    }
+    
+    private func setupForEditMode(tracker: Tracker) {
+        trackerCreateTextView.text = tracker.name
+        trackerCreateTextView.textColor = .appBlack
+        
+        selectedEmoji = tracker.emoji
+        selectedColor = tracker.color
+        
+        if let schedule = tracker.schedule {
+            selectedDays = Set(schedule)
+            selectedDaysString = createDaysString(from: selectedDays)
+            updateScheduleDisplay(selectedDaysString)
+        } else {
+            selectedDaysString = ""
+        }
+        
+        findTrackerCategory(for: tracker)
+        
+        trackerCreationCreateButton.setTitle(NSLocalizedString("save", comment: "Save button"), for: .normal)
+        setupTrackerCreationCreateButtonUI()
+        
+        DispatchQueue.main.async { [weak self] in
+            self?.tableView.reloadData()
+        }
+    }
+    
+    private func createDaysString(from days: Set<Int>) -> String {
+        if days.count == 7 {
+            return NSLocalizedString("every_day", comment: "Every day")
+        }
+        
+        let dayNames = [
+              0: NSLocalizedString("mon", comment: "Mon"),
+              1: NSLocalizedString("tue", comment: "Tue"),
+              2: NSLocalizedString("wed", comment: "Wed"),
+              3: NSLocalizedString("thu", comment: "Thu"),
+              4: NSLocalizedString("fri", comment: "Fri"),
+              5: NSLocalizedString("sat", comment: "Sat"),
+              6: NSLocalizedString("sun", comment: "Sun") 
+          ]
+        
+        let sortedDays = days.sorted()
+        let dayStrings = sortedDays.compactMap { dayNames[$0] }
+        return dayStrings.joined(separator: ", ")
+    }
+    
+    private func findTrackerCategory(for tracker: Tracker) {
+        
+        do {
+            if let categoryTitle = try trackerCategoryStore?.getCategoryTitle(for: tracker.id) {
+                chosenCategoryTitle = categoryTitle
+                
+                DispatchQueue.main.async { [weak self] in
+                    self?.categorySubtitleLabel?.text = categoryTitle
+                }
+            } else {
+                chosenCategoryTitle = "Важное"
+                DispatchQueue.main.async { [weak self] in
+                    self?.categorySubtitleLabel?.text = self?.chosenCategoryTitle
+                }
+            }
+            
+        } catch {
+            chosenCategoryTitle = "Важное"
+            DispatchQueue.main.async { [weak self] in
+                self?.categorySubtitleLabel?.text = self?.chosenCategoryTitle
+            }
+        }
     }
     
     private func createTrackerSettingsSchedule() -> UIView {
@@ -382,7 +479,8 @@ final class TrackerCreationViewController: UIViewController {
         label.translatesAutoresizingMaskIntoConstraints = false
         
         let daysLabel = UILabel()
-        daysLabel.text = selectedDaysString
+        let displayText = selectedDaysString.isEmpty ? "" : selectedDaysString
+        daysLabel.text = displayText
         daysLabel.font = Fonts.ysDisplayMedium17 ?? UIFont.systemFont(ofSize: 17)
         daysLabel.textColor = .appGray
         daysLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -426,7 +524,17 @@ final class TrackerCreationViewController: UIViewController {
     
     private func updateScheduleDisplay(_ daysString: String) {
         selectedDaysString = daysString
-        tableView.reloadSections(IndexSet(integer: 2), with: .none)
+        
+        let settingsSection: Int
+        switch mode {
+        case .create:
+            settingsSection = 2
+        case .edit:
+            settingsSection = 3
+        }
+        DispatchQueue.main.async { [weak self] in
+            self?.tableView.reloadSections(IndexSet(integer: settingsSection), with: .none)
+        }
     }
     
     @objc private func trackerCreationCancelButtonTapped() {
@@ -443,8 +551,17 @@ final class TrackerCreationViewController: UIViewController {
             return
         }
         
+        switch mode {
+        case .create:
+            createNewTracker(name: trackerName, categoryTitle: categoryTitle)
+        case .edit(let originalTracker):
+            updateExistingTracker(originalTracker: originalTracker, name: trackerName, categoryTitle: categoryTitle)
+        }
+    }
+    
+    private func createNewTracker(name: String, categoryTitle: String) {
         let newTracker = Tracker(
-            name: trackerName,
+            name: name,
             color: selectedColor,
             emoji: selectedEmoji,
             schedule: Array(selectedDays)
@@ -470,6 +587,39 @@ final class TrackerCreationViewController: UIViewController {
         }
     }
     
+    private func updateExistingTracker(originalTracker: Tracker, name: String, categoryTitle: String) {
+        let updatedTracker = Tracker(
+            id: originalTracker.id,
+            name: name,
+            color: selectedColor,
+            emoji: selectedEmoji,
+            schedule: Array(selectedDays)
+        )
+        
+        do {
+            guard let trackerStore = trackerStore else {
+                print("TrackerStore is not available")
+                return
+            }
+            
+            try trackerStore.updateTracker(updatedTracker)
+            
+            if let trackerCategoryStore = trackerCategoryStore {
+                try trackerCategoryStore.moveTrackerToCategory(updatedTracker, categoryTitle: categoryTitle)
+            }
+            
+            DispatchQueue.main.async { [weak self] in
+                self?.dismiss(animated: true)
+            }
+            
+        } catch {
+            print("Failed to update tracker: \(error)")
+            DispatchQueue.main.async { [weak self] in
+                self?.showErrorAlert(NSLocalizedString("tracker_update_error", comment: "Tracker update error"))
+            }
+        }
+    }
+    
     private func showErrorAlert(_ message: String) {
         let alert = UIAlertController(title: NSLocalizedString("error", comment: "Error title"), message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: NSLocalizedString("ok", comment: "OK button"), style: .default))
@@ -490,7 +640,11 @@ final class TrackerCreationViewController: UIViewController {
         
         trackerCreateTextView.resignFirstResponder()
         
-        let navigationController = UINavigationController(rootViewController: scheduleViewController)
+        let scheduleVC = ScheduleViewController()
+        scheduleVC.delegate = self
+        scheduleVC.setPreselectedDays(selectedDays)
+        
+        let navigationController = UINavigationController(rootViewController: scheduleVC)
         present(navigationController, animated: true)
     }
     @objc private func categoryTapped() {
@@ -509,135 +663,205 @@ final class TrackerCreationViewController: UIViewController {
 extension TrackerCreationViewController: UITableViewDataSource {
     
     func numberOfSections(in tableView: UITableView) -> Int {
-        return 5
+        switch mode {
+        case .create:
+            return 5
+        case .edit:
+            return 6
+        }
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        switch section {
-        case 0:
-            return 1
-        case 1:
-            return 1
-        case 2:
-            return 1
-        case 3:
-            return 1
-        case 4:
-            return 1
-        default:
-            return 0
-        }
+        return 1
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
         cell.selectionStyle = .none
         
-        switch indexPath.section {
-        case 0:
-            cell.contentView.addSubview(trackerCreateTextView)
-            cell.contentView.addSubview(clearButton)
-            
-            trackerCreateTextView.translatesAutoresizingMaskIntoConstraints = false
-            clearButton.translatesAutoresizingMaskIntoConstraints = false
-            
-            NSLayoutConstraint.activate([
-                trackerCreateTextView.topAnchor.constraint(equalTo: cell.contentView.topAnchor),
-                trackerCreateTextView.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor),
-                trackerCreateTextView.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor),
-                trackerCreateTextView.bottomAnchor.constraint(equalTo: cell.contentView.bottomAnchor),
-                trackerCreateTextView.heightAnchor.constraint(equalToConstant: 75),
-                
-                clearButton.centerYAnchor.constraint(equalTo: trackerCreateTextView.centerYAnchor),
-                clearButton.trailingAnchor.constraint(equalTo: trackerCreateTextView.trailingAnchor, constant: -12),
-                clearButton.widthAnchor.constraint(equalToConstant: 24),
-                clearButton.heightAnchor.constraint(equalToConstant: 24)
-            ])
-            
-        case 1 : break
-            
-        case 2:
-            
-            cell.contentView.subviews.forEach { $0.removeFromSuperview() }
-            trackerSettingsListView.subviews.forEach { $0.removeFromSuperview() }
-            
-            
-            cell.contentView.addSubview(trackerSettingsListView)
-            trackerSettingsListView.addSubview(trackerSettingsCategory)
-            
-            let scheduleView = createTrackerSettingsSchedule()
-            trackerSettingsListView.addSubview(scheduleView)
-            trackerSettingsListView.addSubview(separatorView)
-            
-            NSLayoutConstraint.activate([
-                trackerSettingsListView.topAnchor.constraint(equalTo: cell.contentView.topAnchor),
-                trackerSettingsListView.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor),
-                trackerSettingsListView.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor),
-                trackerSettingsListView.bottomAnchor.constraint(equalTo: cell.contentView.bottomAnchor),
-                
-                trackerSettingsCategory.topAnchor.constraint(equalTo: trackerSettingsListView.topAnchor),
-                trackerSettingsCategory.leadingAnchor.constraint(equalTo: trackerSettingsListView.leadingAnchor),
-                trackerSettingsCategory.trailingAnchor.constraint(equalTo: trackerSettingsListView.trailingAnchor),
-                trackerSettingsCategory.heightAnchor.constraint(equalToConstant: 75),
-                
-                scheduleView.topAnchor.constraint(equalTo: trackerSettingsCategory.bottomAnchor),
-                scheduleView.leadingAnchor.constraint(equalTo: trackerSettingsListView.leadingAnchor),
-                scheduleView.trailingAnchor.constraint(equalTo: trackerSettingsListView.trailingAnchor),
-                scheduleView.bottomAnchor.constraint(equalTo: trackerSettingsListView.bottomAnchor),
-                scheduleView.heightAnchor.constraint(equalToConstant: 75),
-                
-                separatorView.leadingAnchor.constraint(equalTo: trackerSettingsListView.leadingAnchor, constant: 16),
-                separatorView.trailingAnchor.constraint(equalTo: trackerSettingsListView.trailingAnchor, constant: -16),
-                separatorView.topAnchor.constraint(equalTo: trackerSettingsCategory.bottomAnchor),
-                separatorView.heightAnchor.constraint(equalToConstant: 0.5)
-            ])
-            
-        case 3: // Emoji Collection
-            cell.contentView.subviews.forEach { $0.removeFromSuperview() }
-            
-            cell.selectionStyle = .none
-            cell.isUserInteractionEnabled = true
-            cell.contentView.isUserInteractionEnabled = true
-            
-            cell.contentView.addSubview(emojiHeaderLabel)
-            cell.contentView.addSubview(emojiCollectionView)
-            
-            NSLayoutConstraint.activate([
-                emojiHeaderLabel.topAnchor.constraint(equalTo: cell.contentView.topAnchor, constant: 20),
-                emojiHeaderLabel.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor, constant: 28),
-                emojiHeaderLabel.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor, constant: -28),
-                
-                emojiCollectionView.topAnchor.constraint(equalTo: emojiHeaderLabel.bottomAnchor),
-                emojiCollectionView.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor),
-                emojiCollectionView.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor),
-                emojiCollectionView.bottomAnchor.constraint(equalTo: cell.contentView.bottomAnchor),
-                emojiCollectionView.heightAnchor.constraint(equalToConstant: 204)
-            ])
-        case 4: // Color Collection
-            cell.contentView.subviews.forEach { $0.removeFromSuperview() }
-            
-            cell.selectionStyle = .none
-            cell.isUserInteractionEnabled = true
-            cell.contentView.isUserInteractionEnabled = true
-            
-            cell.contentView.addSubview(colorHeaderLabel)
-            cell.contentView.addSubview(colorCollectionView)
-            
-            NSLayoutConstraint.activate([
-                colorHeaderLabel.topAnchor.constraint(equalTo: cell.contentView.topAnchor, constant: 20),
-                colorHeaderLabel.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor, constant: 28),
-                colorHeaderLabel.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor, constant: -28),
-                
-                colorCollectionView.topAnchor.constraint(equalTo: colorHeaderLabel.bottomAnchor),
-                colorCollectionView.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor),
-                colorCollectionView.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor),
-                colorCollectionView.bottomAnchor.constraint(equalTo: cell.contentView.bottomAnchor),
-                colorCollectionView.heightAnchor.constraint(equalToConstant: 204)
-            ])
-            
-        default:
-            break
+        switch mode {
+        case .create:
+            return configureCreateModeCell(cell: cell, indexPath: indexPath)
+        case .edit:
+            return configureEditModeCell(cell: cell, indexPath: indexPath)
         }
+    }
+    
+    private func configureCreateModeCell(cell: UITableViewCell, indexPath: IndexPath) -> UITableViewCell {
+        switch indexPath.section {
+        case 0: // Название трекера
+            return configureTrackerNameCell(cell: cell)
+        case 1: // Разделитель
+            return cell
+        case 2: // Настройки (категория и расписание)
+            return configureSettingsCell(cell: cell)
+        case 3: // Эмоджи
+            return configureEmojiCell(cell: cell)
+        case 4: // Цвет
+            return configureColorCell(cell: cell)
+        default:
+            return cell
+        }
+    }
+    
+    private func configureEditModeCell(cell: UITableViewCell, indexPath: IndexPath) -> UITableViewCell {
+        switch indexPath.section {
+        case 0: // Количество дней выполнения
+            return configureCompletedDaysCell(cell: cell)
+        case 1: // Название трекера
+            return configureTrackerNameCell(cell: cell)
+        case 2: // Разделитель
+            return cell
+        case 3: // Настройки (категория и расписание)
+            return configureSettingsCell(cell: cell)
+        case 4: // Эмоджи
+            return configureEmojiCell(cell: cell)
+        case 5: // Цвет
+            return configureColorCell(cell: cell)
+        default:
+            return cell
+        }
+    }
+    
+    private func configureCompletedDaysCell(cell: UITableViewCell) -> UITableViewCell {
+        cell.contentView.subviews.forEach { $0.removeFromSuperview() }
+        
+        let containerView = UIView()
+        containerView.backgroundColor = .clear
+        containerView.layer.cornerRadius = 16
+        containerView.translatesAutoresizingMaskIntoConstraints = false
+        
+        let daysLabel = UILabel()
+        let localizedString = String.localizedStringWithFormat(
+            NSLocalizedString("days_counter", comment: "Days counter with pluralization"),
+            completedDaysCount
+        )
+        daysLabel.text = localizedString
+        daysLabel.font = Fonts.ysDisplayBold32 ?? UIFont.boldSystemFont(ofSize: 32)
+        daysLabel.textColor = .appBlack
+        daysLabel.textAlignment = .center
+        daysLabel.translatesAutoresizingMaskIntoConstraints = false
+        
+        cell.contentView.addSubview(containerView)
+        containerView.addSubview(daysLabel)
+        
+        NSLayoutConstraint.activate([
+            containerView.topAnchor.constraint(equalTo: cell.contentView.topAnchor),
+            containerView.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor),
+            containerView.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor),
+            containerView.bottomAnchor.constraint(equalTo: cell.contentView.bottomAnchor),
+            containerView.heightAnchor.constraint(equalToConstant: 90),
+            
+            daysLabel.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
+            daysLabel.centerYAnchor.constraint(equalTo: containerView.centerYAnchor)
+        ])
+        
+        return cell
+    }
+    
+    private func configureTrackerNameCell(cell: UITableViewCell) -> UITableViewCell {
+        cell.contentView.addSubview(trackerCreateTextView)
+        cell.contentView.addSubview(clearButton)
+        
+        trackerCreateTextView.translatesAutoresizingMaskIntoConstraints = false
+        clearButton.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            trackerCreateTextView.topAnchor.constraint(equalTo: cell.contentView.topAnchor),
+            trackerCreateTextView.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor),
+            trackerCreateTextView.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor),
+            trackerCreateTextView.bottomAnchor.constraint(equalTo: cell.contentView.bottomAnchor),
+            trackerCreateTextView.heightAnchor.constraint(equalToConstant: 75),
+            
+            clearButton.centerYAnchor.constraint(equalTo: trackerCreateTextView.centerYAnchor),
+            clearButton.trailingAnchor.constraint(equalTo: trackerCreateTextView.trailingAnchor, constant: -12),
+            clearButton.widthAnchor.constraint(equalToConstant: 24),
+            clearButton.heightAnchor.constraint(equalToConstant: 24)
+        ])
+        return cell
+    }
+    
+    private func configureSettingsCell(cell: UITableViewCell) -> UITableViewCell {
+        cell.contentView.subviews.forEach { $0.removeFromSuperview() }
+        trackerSettingsListView.subviews.forEach { $0.removeFromSuperview() }
+        
+        cell.contentView.addSubview(trackerSettingsListView)
+        trackerSettingsListView.addSubview(trackerSettingsCategory)
+        
+        let scheduleView = createTrackerSettingsSchedule()
+        trackerSettingsListView.addSubview(scheduleView)
+        trackerSettingsListView.addSubview(separatorView)
+        
+        NSLayoutConstraint.activate([
+            trackerSettingsListView.topAnchor.constraint(equalTo: cell.contentView.topAnchor),
+            trackerSettingsListView.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor),
+            trackerSettingsListView.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor),
+            trackerSettingsListView.bottomAnchor.constraint(equalTo: cell.contentView.bottomAnchor),
+            
+            trackerSettingsCategory.topAnchor.constraint(equalTo: trackerSettingsListView.topAnchor),
+            trackerSettingsCategory.leadingAnchor.constraint(equalTo: trackerSettingsListView.leadingAnchor),
+            trackerSettingsCategory.trailingAnchor.constraint(equalTo: trackerSettingsListView.trailingAnchor),
+            trackerSettingsCategory.heightAnchor.constraint(equalToConstant: 75),
+            
+            scheduleView.topAnchor.constraint(equalTo: trackerSettingsCategory.bottomAnchor),
+            scheduleView.leadingAnchor.constraint(equalTo: trackerSettingsListView.leadingAnchor),
+            scheduleView.trailingAnchor.constraint(equalTo: trackerSettingsListView.trailingAnchor),
+            scheduleView.bottomAnchor.constraint(equalTo: trackerSettingsListView.bottomAnchor),
+            scheduleView.heightAnchor.constraint(equalToConstant: 75),
+            
+            separatorView.leadingAnchor.constraint(equalTo: trackerSettingsListView.leadingAnchor, constant: 16),
+            separatorView.trailingAnchor.constraint(equalTo: trackerSettingsListView.trailingAnchor, constant: -16),
+            separatorView.topAnchor.constraint(equalTo: trackerSettingsCategory.bottomAnchor),
+            separatorView.heightAnchor.constraint(equalToConstant: 0.5)
+        ])
+        return cell
+    }
+    
+    private func configureEmojiCell(cell: UITableViewCell) -> UITableViewCell {
+        cell.contentView.subviews.forEach { $0.removeFromSuperview() }
+        
+        cell.selectionStyle = .none
+        cell.isUserInteractionEnabled = true
+        cell.contentView.isUserInteractionEnabled = true
+        
+        cell.contentView.addSubview(emojiHeaderLabel)
+        cell.contentView.addSubview(emojiCollectionView)
+        
+        NSLayoutConstraint.activate([
+            emojiHeaderLabel.topAnchor.constraint(equalTo: cell.contentView.topAnchor, constant: 20),
+            emojiHeaderLabel.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor, constant: 28),
+            emojiHeaderLabel.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor, constant: -28),
+            
+            emojiCollectionView.topAnchor.constraint(equalTo: emojiHeaderLabel.bottomAnchor),
+            emojiCollectionView.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor),
+            emojiCollectionView.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor),
+            emojiCollectionView.bottomAnchor.constraint(equalTo: cell.contentView.bottomAnchor),
+            emojiCollectionView.heightAnchor.constraint(equalToConstant: 204)
+        ])
+        return cell
+    }
+    
+    private func configureColorCell(cell: UITableViewCell) -> UITableViewCell {
+        cell.contentView.subviews.forEach { $0.removeFromSuperview() }
+        
+        cell.selectionStyle = .none
+        cell.isUserInteractionEnabled = true
+        cell.contentView.isUserInteractionEnabled = true
+        
+        cell.contentView.addSubview(colorHeaderLabel)
+        cell.contentView.addSubview(colorCollectionView)
+        
+        NSLayoutConstraint.activate([
+            colorHeaderLabel.topAnchor.constraint(equalTo: cell.contentView.topAnchor, constant: 20),
+            colorHeaderLabel.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor, constant: 28),
+            colorHeaderLabel.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor, constant: -28),
+            
+            colorCollectionView.topAnchor.constraint(equalTo: colorHeaderLabel.bottomAnchor),
+            colorCollectionView.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor),
+            colorCollectionView.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor),
+            colorCollectionView.bottomAnchor.constraint(equalTo: cell.contentView.bottomAnchor),
+            colorCollectionView.heightAnchor.constraint(equalToConstant: 204)
+        ])
         return cell
     }
 }
@@ -646,31 +870,49 @@ extension TrackerCreationViewController: UITableViewDataSource {
 extension TrackerCreationViewController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        switch indexPath.section {
-        case 0:
-            return 80
-        case 1:
-            return 20
-        case 2:
-            return 150
-        case 3:
-            let headerHeight: CGFloat = 20 + 19
-            let collectionHeight: CGFloat = 24 + (52 * 3) + 24
-            return headerHeight + collectionHeight
-        case 4:
-            let headerHeight: CGFloat = 20 + 19
-            let collectionHeight: CGFloat = 24 + (52 * 3) + 24
-            return headerHeight + collectionHeight
-        default:
-            return 44
+        switch mode {
+        case .create:
+            return getCreateModeRowHeight(for: indexPath.section)
+        case .edit:
+            return getEditModeRowHeight(for: indexPath.section)
         }
     }
+    
+    private func getCreateModeRowHeight(for section: Int) -> CGFloat {
+        switch section {
+        case 0: return 80  // Название
+        case 1: return 20  // Разделитель
+        case 2: return 150 // Настройки
+        case 3, 4: // Эмоджи и цвет
+            let headerHeight: CGFloat = 20 + 19
+            let collectionHeight: CGFloat = 24 + (52 * 3) + 24
+            return headerHeight + collectionHeight
+        default: return 44
+        }
+    }
+    
+    private func getEditModeRowHeight(for section: Int) -> CGFloat {
+        switch section {
+        case 0: return 90  // Количество дней
+        case 1: return 80  // Название
+        case 2: return 20  // Разделитель
+        case 3: return 150 // Настройки
+        case 4, 5: // Эмоджи и цвет
+            let headerHeight: CGFloat = 20 + 19
+            let collectionHeight: CGFloat = 24 + (52 * 3) + 24
+            return headerHeight + collectionHeight
+        default: return 44
+        }
+    }
+    
+    
+    
+    
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if indexPath.section == 2 {
             tableView.deselectRow(at: indexPath, animated: true)
-            let navigationController = UINavigationController(rootViewController: scheduleViewController)
-            present(navigationController, animated: true)
+            scheduleTapped()
         }
         else if indexPath.section == 3 {
             tableView.deselectRow(at: indexPath, animated: true)

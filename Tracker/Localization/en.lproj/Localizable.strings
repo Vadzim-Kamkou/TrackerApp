@@ -2,6 +2,7 @@
 "trackers" = "Trackers";
 "statistics" = "Statistics";
 "new_habit" = "New Tracker";
+"edit_habit" = "Edit Habit";
 "category" = "Category";
 "new_category" = "New Category";
 "schedule" = "Schedule";
@@ -20,6 +21,8 @@
 "add_category" = "Add Category";
 "onboarding_button" = "That's technology!";
 "ok" = "OK";
+"save" = "Save";
+
 
 /* Context Menu */
 "edit" = "Edit";
@@ -51,7 +54,6 @@
 "friday" = "Friday";
 "saturday" = "Saturday";
 "sunday" = "Sunday";
-
 "mon" = "Mon";
 "tue" = "Tue";
 "wed" = "Wed";
@@ -59,10 +61,10 @@
 "fri" = "Fri";
 "sat" = "Sat";
 "sun" = "Sun";
-
 "every_day" = "Every day";
 
 /* Errors */
 "error" = "Error";
 "tracker_save_error" = "Tracker saving error";
 "category_load_error" = "Category loading error: %@";
+"tracker_update_error" = "Error updating tracker";

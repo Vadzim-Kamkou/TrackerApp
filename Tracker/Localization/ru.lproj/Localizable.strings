@@ -2,6 +2,7 @@
 "trackers" = "Трекеры";
 "statistics" = "Статистика";
 "new_habit" = "Новая привычка";
+"edit_habit" = "Редактирование привычки";
 "category" = "Категория";
 "new_category" = "Новая категория";
 "schedule" = "Расписание";
@@ -20,6 +21,7 @@
 "add_category" = "Добавить категорию";
 "onboarding_button" = "Вот это технологии!";
 "ok" = "OK";
+"save" = "Сохранить";
 
 /* Context Menu */
 "edit" = "Редактировать";
@@ -51,7 +53,6 @@
 "friday" = "Пятница";
 "saturday" = "Суббота";
 "sunday" = "Воскресенье";
-
 "mon" = "Пн";
 "tue" = "Вт";
 "wed" = "Ср";
@@ -59,11 +60,11 @@
 "fri" = "Пт";
 "sat" = "Сб";
 "sun" = "Вс";
-
 "every_day" = "Каждый день";
 
 /* Errors */
 "error" = "Ошибка";
 "tracker_save_error" = "Ошибка сохранения трекера";
 "category_load_error" = "Ошибка загрузки категорий: %@";
+"tracker_update_error" = "Ошибка при обновлении трекера";
 
