@@ -351,9 +351,9 @@ final class TrackerViewController: UIViewController {
     // MARK: - Helper Methods
     private func updateViewVisibility() {
         let hasTrackers = !filteredCategories.isEmpty
-        let hasAnyTrackers = !categories.isEmpty
-        
-        filterButton.isHidden = !hasAnyTrackers
+        let hasTrackersForCurrentDate = hasTrackersAvailableForCurrentDate()
+
+        filterButton.isHidden = !hasTrackersForCurrentDate
         
         updateEmptyStateMessage(hasTrackers: hasTrackers)
         
@@ -370,6 +370,18 @@ final class TrackerViewController: UIViewController {
                 self?.view.bringSubviewToFront(filterButton)
             }
         })
+    }
+    
+    private func hasTrackersAvailableForCurrentDate() -> Bool {
+        for category in categories {
+            for tracker in category.trackers {
+                if shouldShowTracker(tracker, for: currentDate) {
+                    return true
+                }
+            }
+        }
+        
+        return false
     }
     
     private func updateEmptyStateMessage(hasTrackers: Bool) {
