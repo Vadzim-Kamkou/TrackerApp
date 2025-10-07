@@ -144,6 +144,17 @@ final class TrackerViewController: UIViewController {
         loadInitialData()
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        AnalyticsService.trackScreenOpen(screen: "Main")
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        AnalyticsService.trackScreenClose(screen: "Main")
+    }
+    
+    
     // MARK: - Setup
     private func setupUI() {
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(donePressed))
@@ -252,6 +263,8 @@ final class TrackerViewController: UIViewController {
     }
     
     @objc private func filterButtonTapped() {
+        AnalyticsService.trackClick(screen: "Main", item: "filter")
+
         let filterVC = FilterViewController(currentFilter: currentFilter)
         filterVC.delegate = self
         
@@ -425,6 +438,8 @@ final class TrackerViewController: UIViewController {
     }
     
     @objc private func openNewScreen() {
+        AnalyticsService.trackClick(screen: "Main", item: "add_track")
+
         let trackerCreationVC = TrackerCreationViewController(
             coreDataManager: coreDataManager,
             trackerStore: trackerStore,

@@ -181,6 +181,8 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     
     // MARK: - Actions
     @objc private func actionButtonTapped() {
+        AnalyticsService.trackClick(screen: "Main", item: "track")
+
         isCompleted.toggle()
         updateButtonAppearance()
         
@@ -227,6 +229,8 @@ extension TrackerCollectionViewCell: UIContextMenuInteractionDelegate {
             let editAction = UIAction(
                 title: NSLocalizedString("edit", comment: "Edit tracker")
             ) { [weak self] _ in
+                AnalyticsService.trackClick(screen: "Main", item: "edit")
+                
                 self?.delegate?.didRequestEdit(for: tracker)
             }
             
@@ -234,6 +238,8 @@ extension TrackerCollectionViewCell: UIContextMenuInteractionDelegate {
                 title: NSLocalizedString("delete", comment: "Delete tracker"),
                 attributes: .destructive
             ) { [weak self] _ in
+                AnalyticsService.trackClick(screen: "Main", item: "delete")
+
                 self?.delegate?.didRequestDelete(for: tracker)
             }
             
