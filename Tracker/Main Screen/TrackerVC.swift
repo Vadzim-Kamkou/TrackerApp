@@ -67,6 +67,21 @@ final class TrackerViewController: UIViewController {
         return button
     }()
     
+    // MARK: - Filter Properties
+    private var currentFilter: TrackerFilter = .allTrackers
+    
+    private lazy var filterButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle(NSLocalizedString("filters", comment: "Filters button"), for: .normal)
+        button.setTitleColor(.white, for: .normal)
+        button.backgroundColor = .appBlue
+        button.titleLabel?.font = Fonts.ysDisplayMedium16 ?? UIFont.systemFont(ofSize: 16, weight: .medium)
+        button.layer.cornerRadius = 16
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.addTarget(self, action: #selector(filterButtonTapped), for: .touchUpInside)
+        return button
+    }()
+    
     // MARK: - Properties Data
     var categories: [TrackerCategory] = []
     var completedTrackers: Set<String> = []
@@ -83,8 +98,9 @@ final class TrackerViewController: UIViewController {
     private var filteredCategories: [TrackerCategory] {
         let result: [TrackerCategory] = categories.compactMap { category in
             let filteredTrackers = category.trackers.filter { tracker in
-                let shouldShow = shouldShowTracker(tracker, for: currentDate)
-                return shouldShow
+                let shouldShowByDate = shouldShowTracker(tracker, for: currentDate)
+                let shouldShowByFilter = shouldShowTrackerByFilter(tracker)
+                return shouldShowByDate && shouldShowByFilter
             }
             
             if filteredTrackers.isEmpty {
@@ -116,8 +132,10 @@ final class TrackerViewController: UIViewController {
         view.backgroundColor = .white
         setupNavigationBar()
         setupUI()
+        setupFilterButton()
         setupCollectionView()
         updateViewVisibility()
+        loadSavedFilter()
         
         trackerStore?.delegate = self
         trackerCategoryStore?.delegate = self
@@ -209,6 +227,49 @@ final class TrackerViewController: UIViewController {
         return shouldShow
     }
     
+    // MARK: - Filter Logic
+    private func shouldShowTrackerByFilter(_ tracker: Tracker) -> Bool {
+        switch currentFilter {
+        case .allTrackers, .todayTrackers:
+            return true
+        case .completedTrackers:
+            return isTrackerCompletedToday(tracker)
+        case .uncompletedTrackers:
+            return !isTrackerCompletedToday(tracker)
+        }
+    }
+    
+    private func setupFilterButton() {
+        view.addSubview(filterButton)
+        view.bringSubviewToFront(filterButton)
+        
+        NSLayoutConstraint.activate([
+            filterButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            filterButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
+            filterButton.heightAnchor.constraint(equalToConstant: 50),
+            filterButton.widthAnchor.constraint(equalToConstant: 114)
+        ])
+    }
+    
+    @objc private func filterButtonTapped() {
+        let filterVC = FilterViewController(currentFilter: currentFilter)
+        filterVC.delegate = self
+        
+        let navigationController = UINavigationController(rootViewController: filterVC)
+        present(navigationController, animated: true)
+    }
+    
+    private func loadSavedFilter() {
+        if let savedFilterRawValue = UserDefaults.standard.object(forKey: "selectedFilter") as? Int,
+           let savedFilter = TrackerFilter(rawValue: savedFilterRawValue) {
+            currentFilter = savedFilter
+        }
+    }
+    
+    private func saveCurrentFilter() {
+        UserDefaults.standard.set(currentFilter.rawValue, forKey: "selectedFilter")
+    }
+    
     // MARK: - Collection View Setup
     private func setupCollectionView() {
         view.addSubview(collectionView)
@@ -221,7 +282,7 @@ final class TrackerViewController: UIViewController {
             collectionView.topAnchor.constraint(equalTo: searchBar.bottomAnchor, constant: 10),
             collectionView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
             collectionView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
-            collectionView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
+            collectionView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: 0)
         ])
     }
     
@@ -265,6 +326,11 @@ final class TrackerViewController: UIViewController {
     // MARK: - Helper Methods
     private func updateViewVisibility() {
         let hasTrackers = !filteredCategories.isEmpty
+        let hasAnyTrackers = !categories.isEmpty
+        
+        filterButton.isHidden = !hasAnyTrackers
+        
+        updateEmptyStateMessage(hasTrackers: hasTrackers)
         
         UIView.animate(withDuration: 0.3, animations: { [weak self] in
             self?.collectionView.alpha = hasTrackers ? 1.0 : 0.0
@@ -274,7 +340,24 @@ final class TrackerViewController: UIViewController {
             self?.collectionView.isHidden = !hasTrackers
             self?.trackerView?.isHidden = hasTrackers
             self?.trackerLabel?.isHidden = hasTrackers
+            
+            if let filterButton = self?.filterButton {
+                self?.view.bringSubviewToFront(filterButton)
+            }
         })
+    }
+    
+    private func updateEmptyStateMessage(hasTrackers: Bool) {
+        guard !hasTrackers else { return }
+        
+        let message: String
+        if currentFilter.isActiveFilter {
+            message = NSLocalizedString("nothing_found", comment: "Nothing found message")
+        } else {
+            message = NSLocalizedString("what_to_track", comment: "Empty state message")
+        }
+        
+        trackerLabel?.text = message
     }
     
     private func animateTrackerAddition() {
@@ -600,6 +683,24 @@ extension TrackerViewController: TrackerCellDelegate {
             )
             alert.addAction(UIAlertAction(title: NSLocalizedString("ok", comment: "OK"), style: .default))
             self?.present(alert, animated: true)
+        }
+    }
+}
+
+// MARK: - FilterViewControllerDelegate
+extension TrackerViewController: FilterViewControllerDelegate {
+    func didSelectFilter(_ filter: TrackerFilter) {
+        currentFilter = filter
+        saveCurrentFilter()
+        
+        if filter.setsCurrentDate {
+            datePicker.date = Date()
+            currentDate = Date()
+        }
+        
+        DispatchQueue.main.async { [weak self] in
+            self?.collectionView.reloadData()
+            self?.updateViewVisibility()
         }
     }
 }

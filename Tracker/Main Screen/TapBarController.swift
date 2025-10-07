@@ -16,6 +16,8 @@ final class TabBarController: UITabBarController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        setupTabBarSeparator()
+        
         let trackerVC = TrackerViewController(coreDataManager: coreDataManager)
         let statisticsVC = StatisticsViewController(coreDataManager: coreDataManager)
         let trackerNav = UINavigationController(rootViewController: trackerVC)
@@ -40,5 +42,20 @@ final class TabBarController: UITabBarController {
         statisticsVC.tabBarItem.setTitleTextAttributes(attributes, for: .normal)
         
         viewControllers = [trackerNav, statisticsVC]
+    }
+    
+    private func setupTabBarSeparator() {
+        let separator = UIView()
+        separator.backgroundColor = .appGray
+        separator.translatesAutoresizingMaskIntoConstraints = false
+        
+        tabBar.addSubview(separator)
+        
+        NSLayoutConstraint.activate([
+            separator.topAnchor.constraint(equalTo: tabBar.topAnchor),
+            separator.leadingAnchor.constraint(equalTo: tabBar.leadingAnchor),
+            separator.trailingAnchor.constraint(equalTo: tabBar.trailingAnchor),
+            separator.heightAnchor.constraint(equalToConstant: 0.5)
+        ])
     }
 }

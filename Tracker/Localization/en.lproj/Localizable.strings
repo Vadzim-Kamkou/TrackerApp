@@ -29,6 +29,14 @@
 "delete" = "Delete";
 "delete_confirmation_title" = "Are you sure you want to delete the tracker?";
 
+/* Filters */
+"filters" = "Filters";
+"filter_all_trackers" = "All trackers";
+"filter_today_trackers" = "Today's trackers";
+"filter_completed_trackers" = "Completed";
+"filter_uncompleted_trackers" = "Uncompleted";
+"nothing_found" = "Nothing found";
+
 /* Placeholders*/
 "search" = "Search";
 "enter_tracker_name" = "Enter tracker name";
