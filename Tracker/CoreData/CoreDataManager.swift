@@ -3,6 +3,9 @@ import CoreData
 
 protocol CoreDataManagerProtocol {
     var viewContext: NSManagedObjectContext { get }
+    var trackerStore: TrackerStore { get }
+    var trackerRecordStore: TrackerRecordStore { get }
+    var trackerCategoryStore: TrackerCategoryStore { get }
     
     func saveContext()
     func fetch<T: NSManagedObject>(_ request: NSFetchRequest<T>) -> [T]
@@ -17,6 +20,30 @@ final class CoreDataManager: CoreDataManagerProtocol {
     var viewContext: NSManagedObjectContext {
         return persistentContainer.viewContext
     }
+    
+    lazy var trackerStore: TrackerStore = {
+        do {
+            return try TrackerStore(context: viewContext)
+        } catch {
+            fatalError("Failed to initialize TrackerStore: \(error)")
+        }
+    }()
+    
+    lazy var trackerRecordStore: TrackerRecordStore = {
+        do {
+            return try TrackerRecordStore(context: viewContext)
+        } catch {
+            fatalError("Failed to initialize TrackerRecordStore: \(error)")
+        }
+    }()
+    
+    lazy var trackerCategoryStore: TrackerCategoryStore = {
+        do {
+            return try TrackerCategoryStore(context: viewContext)
+        } catch {
+            fatalError("Failed to initialize TrackerCategoryStore: \(error)")
+        }
+    }()
     
     init(container: NSPersistentContainer) {
         self.persistentContainer = container

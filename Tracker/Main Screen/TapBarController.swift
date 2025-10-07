@@ -16,29 +16,47 @@ final class TabBarController: UITabBarController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        setupTabBarSeparator()
+        
         let trackerVC = TrackerViewController(coreDataManager: coreDataManager)
         let statisticsVC = StatisticsViewController(coreDataManager: coreDataManager)
         let trackerNav = UINavigationController(rootViewController: trackerVC)
         
         let attributes: [NSAttributedString.Key: Any] = [
             .font: Fonts.ysDisplayMedium10 ?? UIFont.systemFont(ofSize: 10),
-            .foregroundColor: UIColor.black
+            .foregroundColor: UIColor(resource: .appBlue)
+
         ]
         
         trackerVC.tabBarItem = UITabBarItem(
-            title: "Трекеры",
+            title: NSLocalizedString("trackers", comment: "Trackers tab title"),
             image: UIImage(resource: .tapBarTrackerIconPassive),
             selectedImage: UIImage(resource: .tapBarTrackerIconActive)
         )
         trackerVC.tabBarItem.setTitleTextAttributes(attributes, for: .normal)
         
         statisticsVC.tabBarItem = UITabBarItem(
-            title: "Статистика",
+            title: NSLocalizedString("statistics", comment: "Statistics tab title"),
             image: UIImage(resource: .tapBarStatisticsPassive),
             selectedImage: UIImage(resource: .tapBarStatisticsActive)
         )
         statisticsVC.tabBarItem.setTitleTextAttributes(attributes, for: .normal)
         
         viewControllers = [trackerNav, statisticsVC]
+    }
+    
+    private func setupTabBarSeparator() {
+        let separator = UIView()
+        separator.backgroundColor = .appTapBarSeparator
+        separator.translatesAutoresizingMaskIntoConstraints = false
+        
+        tabBar.addSubview(separator)
+        
+        NSLayoutConstraint.activate([
+            separator.topAnchor.constraint(equalTo: tabBar.topAnchor),
+            separator.leadingAnchor.constraint(equalTo: tabBar.leadingAnchor),
+            separator.trailingAnchor.constraint(equalTo: tabBar.trailingAnchor),
+            separator.heightAnchor.constraint(equalToConstant: 0.5)
+        ])
     }
 }

@@ -1,9 +1,16 @@
 import UIKit
 
+protocol TrackerCellDelegate: AnyObject {
+    func didRequestEdit(for tracker: Tracker)
+    func didRequestDelete(for tracker: Tracker)
+}
+
 final class TrackerCollectionViewCell: UICollectionViewCell {
     
     // MARK: - Properties
     static let identifier = "TrackerCollectionViewCell"
+    
+    weak var delegate: TrackerCellDelegate?
     
     private let backgroundCardView: UIView = {
         let view = UIView()
@@ -16,7 +23,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 16)
         label.textAlignment = .center
-        label.backgroundColor = UIColor.white.withAlphaComponent(0.3)
+        label.backgroundColor = UIColor(resource: .appEmojiBackground)
         label.layer.cornerRadius = 12
         label.layer.masksToBounds = true
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -36,7 +43,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     private let counterLabel: UILabel = {
         let label = UILabel()
         label.font = Fonts.ysDisplayMedium12 ?? UIFont.systemFont(ofSize: 12, weight: .medium)
-        label.textColor = .black
+        label.backgroundColor = .clear
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -57,6 +64,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupUI()
+        setupContextMenu()
     }
     
     required init?(coder: NSCoder) {
@@ -75,6 +83,12 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         setupConstraints()
         setupButtonAction()
     }
+    
+    private func setupContextMenu() {
+           let contextMenuInteraction = UIContextMenuInteraction(delegate: self)
+           backgroundCardView.addInteraction(contextMenuInteraction)
+           backgroundCardView.isUserInteractionEnabled = true
+       }
     
     private func setupConstraints() {
         NSLayoutConstraint.activate([
@@ -132,34 +146,18 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     }
     
     private func updateCounterText(_ days: Int) {
-        let daysText: String
-        let lastDigit = days % 10
-        let lastTwoDigits = days % 100
-        
-        if lastTwoDigits >= 11 && lastTwoDigits <= 14 {
-            daysText = "дней"
-        } else {
-            switch lastDigit {
-            case 1:
-                daysText = "день"
-            case 2, 3, 4:
-                daysText = "дня"
-            default:
-                daysText = "дней"
-            }
-        }
-        
-        let fullText = "\(days) \(daysText)"
-        let attributedString = NSMutableAttributedString(string: fullText)
-        
-        if let range = fullText.range(of: "\(days)") {
-            let nsRange = NSRange(range, in: fullText)
+        let localizedString = String.localizedStringWithFormat(
+            NSLocalizedString("days_counter", comment: "Days counter with pluralization"),
+            days
+        )
+        let attributedString = NSMutableAttributedString(string: localizedString)
+        if let range = localizedString.range(of: "\(days)") {
+            let nsRange = NSRange(range, in: localizedString)
             attributedString.addAttribute(.font,
                                           value: Fonts.ysDisplayBold12 ?? UIFont.boldSystemFont(ofSize: 12),
                                           range: nsRange)
         }
-        
-        counterLabel.attributedText = attributedString 
+        counterLabel.attributedText = attributedString
     }
     
     private func updateButtonAppearance() {
@@ -183,6 +181,8 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
     
     // MARK: - Actions
     @objc private func actionButtonTapped() {
+        AnalyticsService.trackClick(screen: "Main", item: "track")
+
         isCompleted.toggle()
         updateButtonAppearance()
         
@@ -205,6 +205,7 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         tracker = nil
         isCompleted = false
         completionHandler = nil
+        delegate = nil
         
         emojiLabel.text = nil
         titleLabel.text = nil
@@ -216,5 +217,33 @@ final class TrackerCollectionViewCell: UICollectionViewCell {
         actionButton.setTitleColor(nil, for: .normal)
         actionButton.isEnabled = true
         actionButton.alpha = 1.0
+    }
+}
+
+// MARK: - UIContextMenuInteractionDelegate
+extension TrackerCollectionViewCell: UIContextMenuInteractionDelegate {
+    func contextMenuInteraction(_ interaction: UIContextMenuInteraction, configurationForMenuAtLocation location: CGPoint) -> UIContextMenuConfiguration? {
+        guard let tracker = tracker else { return nil }
+        
+        return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { _ in
+            let editAction = UIAction(
+                title: NSLocalizedString("edit", comment: "Edit tracker")
+            ) { [weak self] _ in
+                AnalyticsService.trackClick(screen: "Main", item: "edit")
+                
+                self?.delegate?.didRequestEdit(for: tracker)
+            }
+            
+            let deleteAction = UIAction(
+                title: NSLocalizedString("delete", comment: "Delete tracker"),
+                attributes: .destructive
+            ) { [weak self] _ in
+                AnalyticsService.trackClick(screen: "Main", item: "delete")
+
+                self?.delegate?.didRequestDelete(for: tracker)
+            }
+            
+            return UIMenu(title: "", options: .displayInline, children: [editAction, deleteAction])
+        }
     }
 }

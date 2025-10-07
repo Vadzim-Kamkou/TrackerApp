@@ -53,7 +53,6 @@ final class TrackerRecordStore: NSObject {
         if let recordToDelete = records.first {
             context.delete(recordToDelete)
             try context.save()
-            print("Deleted tracker record for tracker \(trackerId) on \(date)")
         }
     }
     
@@ -77,7 +76,7 @@ final class TrackerRecordStore: NSObject {
             date: date
         )
     }
-
+    
     // MARK: - Private Functions
     private func setupFetchedResultsController() throws {
         let fetchRequest = TrackerRecordCoreData.fetchRequest()
@@ -97,6 +96,92 @@ final class TrackerRecordStore: NSObject {
         controller.delegate = self
         self.fetchedResultsController = controller
         try controller.performFetch()
+    }
+    
+    func getRecordsForDate(_ date: Date) -> [TrackerRecord] {
+        let fetchRequest: NSFetchRequest<TrackerRecordCoreData> = TrackerRecordCoreData.fetchRequest()
+        
+        let calendar = Calendar.current
+        let startOfDay = calendar.startOfDay(for: date)
+        let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
+        
+        fetchRequest.predicate = NSPredicate(
+            format: "date >= %@ AND date < %@",
+            startOfDay as NSDate,
+            endOfDay as NSDate
+        )
+        
+        do {
+            let recordsCoreData = try context.fetch(fetchRequest)
+            return recordsCoreData.compactMap { recordCoreData in
+                guard let id = recordCoreData.id,
+                      let date = recordCoreData.date else { return nil }
+                return TrackerRecord(id: id, date: date)
+            }
+        } catch {
+            print("Failed to fetch records for date: \(error)")
+            return []
+        }
+    }
+    
+    func getAllRecords() -> [TrackerRecord] {
+        let fetchRequest: NSFetchRequest<TrackerRecordCoreData> = TrackerRecordCoreData.fetchRequest()
+        
+        do {
+            let recordsCoreData = try context.fetch(fetchRequest)
+            let records: [TrackerRecord] = recordsCoreData.compactMap { recordCoreData -> TrackerRecord? in
+                guard let id = recordCoreData.id,
+                      let date = recordCoreData.date else { return nil }
+                return TrackerRecord(id: id, date: date)
+            }
+            return records
+        } catch {
+            print("Failed to fetch all records: \(error)")
+            return []
+        }
+    }
+    
+    func getAllUniqueDates() -> [Date] {
+        let fetchRequest: NSFetchRequest<TrackerRecordCoreData> = TrackerRecordCoreData.fetchRequest()
+        
+        do {
+            let recordsCoreData = try context.fetch(fetchRequest)
+            let dates = recordsCoreData.compactMap { $0.date }
+            
+            let calendar = Calendar.current
+            let uniqueDates = Set(dates.map { calendar.startOfDay(for: $0) })
+            
+            return Array(uniqueDates).sorted()
+        } catch {
+            print("Failed to fetch unique dates: \(error)")
+            return []
+        }
+    }
+    
+    func deleteAllRecords(for trackerId: UUID) throws {
+        let fetchRequest: NSFetchRequest<TrackerRecordCoreData> = TrackerRecordCoreData.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "id == %@", trackerId as CVarArg)
+        
+        let records = try context.fetch(fetchRequest)
+        
+        for record in records {
+            context.delete(record)
+        }
+        
+        try context.save()
+    }
+    
+    func getCompletedDaysCount(for trackerId: UUID) -> Int {
+        let fetchRequest: NSFetchRequest<TrackerRecordCoreData> = TrackerRecordCoreData.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "id == %@", trackerId as CVarArg)
+        
+        do {
+            let records = try context.fetch(fetchRequest)
+            return records.count
+        } catch {
+            print("Failed to fetch completed days count for tracker \(trackerId): \(error)")
+            return 0
+        }
     }
 }
 

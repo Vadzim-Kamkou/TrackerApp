@@ -1,0 +1,78 @@
+/* Main Titles */
+"trackers" = "Трекеры";
+"statistics" = "Статистика";
+"new_habit" = "Новая привычка";
+"edit_habit" = "Редактирование привычки";
+"category" = "Категория";
+"new_category" = "Новая категория";
+"schedule" = "Расписание";
+
+/* Statistics */
+"statistics" = "Статистика";
+"statistics_completed_today_percentage" = "Выполнено сегодня";
+"statistics_completed_7days_percentage" = "Среднее значение за 7 дней";
+"statistics_ideal_days_count" = "Идеальных дней";
+"statistics_trackers_completed_count" = "Трекеров завершено";
+
+/* Buttons */
+"done" = "Готово";
+"create" = "Создать";
+"cancel" = "Отмена";
+"add_category" = "Добавить категорию";
+"onboarding_button" = "Вот это технологии!";
+"ok" = "OK";
+"save" = "Сохранить";
+
+/* Context Menu */
+"edit" = "Редактировать";
+"delete" = "Удалить";
+"delete_confirmation_title" = "Уверены что хотите удалить трекер?";
+
+/* Filters */
+"filters" = "Фильтры";
+"filter_all_trackers" = "Все трекеры";
+"filter_today_trackers" = "Трекеры на сегодня";
+"filter_completed_trackers" = "Завершенные";
+"filter_uncompleted_trackers" = "Не завершенные";
+"nothing_found" = "Ничего не найдено";
+
+/* Placeholders*/
+"search" = "Поиск";
+"enter_tracker_name" = "Введите название трекера";
+"enter_category_name" = "Введите название категории";
+
+/* Messages */
+"what_to_track" = "Что будем отслеживать?";
+"statistics_to_track" = "Анализировать пока нечего";
+"habits_events_description" = "Привычки и события можно\nобъединить по смыслу";
+"character_limit" = "Ограничение 38 символов";
+"onboarding_title_1" = "Отслеживайте только то, что хотите";
+"onboarding_title_2" = "Даже если это не литры воды и зарядка";
+
+/* Sections */
+"emoji" = "Эмоджи";
+"color" = "Цвет";
+
+/* Weekdays */
+"monday" = "Понедельник";
+"tuesday" = "Вторник";
+"wednesday" = "Среда";
+"thursday" = "Четверг";
+"friday" = "Пятница";
+"saturday" = "Суббота";
+"sunday" = "Воскресенье";
+"mon" = "Пн";
+"tue" = "Вт";
+"wed" = "Ср";
+"thu" = "Чт";
+"fri" = "Пт";
+"sat" = "Сб";
+"sun" = "Вс";
+"every_day" = "Каждый день";
+
+/* Errors */
+"error" = "Ошибка";
+"tracker_save_error" = "Ошибка сохранения трекера";
+"category_load_error" = "Ошибка загрузки категорий: %@";
+"tracker_update_error" = "Ошибка при обновлении трекера";
+

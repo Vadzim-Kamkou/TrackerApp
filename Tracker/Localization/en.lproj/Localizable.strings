@@ -1,0 +1,78 @@
+/* Main Titles */
+"trackers" = "Trackers";
+"statistics" = "Statistics";
+"new_habit" = "New Tracker";
+"edit_habit" = "Edit Habit";
+"category" = "Category";
+"new_category" = "New Category";
+"schedule" = "Schedule";
+
+/* Statistics */
+"statistics" = "Statistics";
+"statistics_completed_today_percentage" = "Completed today";
+"statistics_completed_7days_percentage" = "7-day average";
+"statistics_ideal_days_count" = "Ideal days";
+"statistics_trackers_completed_count" = "Trackers completed";
+
+/* Buttons */
+"done" = "Done";
+"create" = "Create";
+"cancel" = "Cancel";
+"add_category" = "Add Category";
+"onboarding_button" = "That's technology!";
+"ok" = "OK";
+"save" = "Save";
+
+
+/* Context Menu */
+"edit" = "Edit";
+"delete" = "Delete";
+"delete_confirmation_title" = "Are you sure you want to delete the tracker?";
+
+/* Filters */
+"filters" = "Filters";
+"filter_all_trackers" = "All trackers";
+"filter_today_trackers" = "Today's trackers";
+"filter_completed_trackers" = "Completed";
+"filter_uncompleted_trackers" = "Uncompleted";
+"nothing_found" = "Nothing found";
+
+/* Placeholders*/
+"search" = "Search";
+"enter_tracker_name" = "Enter tracker name";
+"enter_category_name" = "Enter category name";
+
+/* Messages */
+"what_to_track" = "What will we track?";
+"statistics_to_track" = "There is nothing to analyze yet";
+"habits_events_description" = "Habits and events can be\ncombined by meaning";
+"character_limit" = "38 character limit";
+"onboarding_title_1" = "Track only what you want";
+"onboarding_title_2" = "Even if it's not liters of water and charging";
+
+/* Sections */
+"emoji" = "Emoji";
+"color" = "Color";
+
+/* Weekdays */
+"monday" = "Monday";
+"tuesday" = "Tuesday";
+"wednesday" = "Wednesday";
+"thursday" = "Thursday";
+"friday" = "Friday";
+"saturday" = "Saturday";
+"sunday" = "Sunday";
+"mon" = "Mon";
+"tue" = "Tue";
+"wed" = "Wed";
+"thu" = "Thu";
+"fri" = "Fri";
+"sat" = "Sat";
+"sun" = "Sun";
+"every_day" = "Every day";
+
+/* Errors */
+"error" = "Error";
+"tracker_save_error" = "Tracker saving error";
+"category_load_error" = "Category loading error: %@";
+"tracker_update_error" = "Error updating tracker";

@@ -48,7 +48,7 @@ final class CategoryViewController: UIViewController {
     
     private lazy var addCategoryButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Добавить категорию", for: .normal)
+        button.setTitle(NSLocalizedString("add_category", comment: "Add category"), for: .normal)
         button.titleLabel?.font = Fonts.ysDisplayMedium16 ?? UIFont.systemFont(ofSize: 16, weight: .medium)
         button.backgroundColor = .appBlack
         button.setTitleColor(.white, for: .normal)
@@ -127,7 +127,7 @@ final class CategoryViewController: UIViewController {
         
         navigationController?.navigationBar.standardAppearance = appearance
         navigationController?.navigationBar.scrollEdgeAppearance = appearance
-        title = "Категория"
+        title = NSLocalizedString("category", comment: "Category title")
     }
     
     // MARK: - MVVM

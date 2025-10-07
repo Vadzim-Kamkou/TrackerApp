@@ -72,6 +72,62 @@ final class TrackerStore: NSObject {
         self.fetchedResultsController = controller
         try controller.performFetch()
     }
+    
+    func getTrackersForDate(_ date: Date) -> [Tracker] {
+        do {
+            let allTrackers = try fetchTracker()
+            let weekday = Calendar.current.component(.weekday, from: date)
+            
+            let scheduleWeekday: Int
+            if weekday == 1 {
+                scheduleWeekday = 6
+            } else {
+                scheduleWeekday = weekday - 2
+            }
+            
+            return allTrackers.filter { tracker in
+                guard let schedule = tracker.schedule else { return true }
+                return schedule.contains(scheduleWeekday)
+            }
+        } catch {
+            print("Failed to fetch trackers for date: \(error)")
+            return []
+        }
+    }
+    
+    func deleteTracker(with id: UUID) throws {
+        let fetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "id == %@", id as CVarArg)
+        fetchRequest.fetchLimit = 1
+        
+        let trackers = try context.fetch(fetchRequest)
+        
+        guard let trackerToDelete = trackers.first else {
+            throw TrackerStoreError.trackerNotFound
+        }
+        
+        context.delete(trackerToDelete)
+        try context.save()
+    }
+    
+    func updateTracker(_ tracker: Tracker) throws {
+        let fetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "id == %@", tracker.id as CVarArg)
+        fetchRequest.fetchLimit = 1
+        
+        let trackers = try context.fetch(fetchRequest)
+        
+        guard let trackerCoreData = trackers.first else {
+            throw TrackerStoreError.trackerNotFound
+        }
+        
+        trackerCoreData.name = tracker.name
+        trackerCoreData.emoji = tracker.emoji
+        trackerCoreData.uiColor = tracker.color
+        trackerCoreData.scheduleArray = tracker.schedule ?? []
+        
+        try context.save()
+    }
 }
 
 // MARK: - Extension
@@ -90,19 +146,20 @@ extension TrackerCoreData {
     
     var scheduleArray: [Int] {
         get {
-            guard let scheduleString = schedule as? String else {
+            guard let scheduleArray = schedule as? [Int] else {
+                if let scheduleString = schedule as? String {
+                    let components = scheduleString.split(separator: ",")
+                    return components.compactMap { Int($0) }
+                }
                 return []
             }
-            
-            let components = scheduleString.split(separator: ",")
-            return components.compactMap { Int($0) }
+            return scheduleArray
         }
         set {
             if newValue.isEmpty {
                 schedule = nil
             } else {
-                let scheduleString = newValue.map { String($0) }.joined(separator: ",")
-                schedule = scheduleString as NSObject
+                schedule = newValue as NSArray
             }
         }
     }

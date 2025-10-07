@@ -59,7 +59,6 @@ final class CategoryViewModel: CategoryViewModelProtocol {
             onCategoriesUpdated?()
             onEmptyStateChanged?(_categories.isEmpty)
             
-            print("Загружено \(_categories.count) категорий")
         } catch {
             onError?("Ошибка загрузки категорий: \(error.localizedDescription)")
         }

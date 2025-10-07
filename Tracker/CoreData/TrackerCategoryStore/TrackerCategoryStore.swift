@@ -25,9 +25,9 @@ final class TrackerCategoryStore: NSObject {
             }
             return
         }
-
+        
         let context = delegate.persistentContainer.viewContext
-
+        
         do {
             try self.init(context: context)
         } catch {
@@ -39,7 +39,7 @@ final class TrackerCategoryStore: NSObject {
             }
         }
     }
-
+    
     init(context: NSManagedObjectContext) throws {
         self.context = context
         super.init()
@@ -76,11 +76,9 @@ final class TrackerCategoryStore: NSObject {
             trackerCoreData.category = existingCategoryCoreData
             
             try context.save()
-            print("Added tracker '\(tracker.name)' to existing category '\(categoryTitle)'")
         } else {
             let newCategory = TrackerCategory(title: categoryTitle, trackers: [tracker])
             try addTrackerCategory(newCategory)
-            print("Created new category '\(categoryTitle)' with tracker '\(tracker.name)'")
         }
     }
     
@@ -111,6 +109,36 @@ final class TrackerCategoryStore: NSObject {
         )
     }
     
+    func moveTrackerToCategory(_ tracker: Tracker, categoryTitle: String) throws {
+        let trackerFetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
+        trackerFetchRequest.predicate = NSPredicate(format: "id == %@", tracker.id as CVarArg)
+        trackerFetchRequest.fetchLimit = 1
+        
+        let trackers = try context.fetch(trackerFetchRequest)
+        guard let trackerCoreData = trackers.first else {
+            throw TrackerCategoryStoreError.trackerNotFound
+        }
+        
+        let targetCategoryCoreData = try fetchCategoryCoreData(with: categoryTitle) ?? {
+            let newCategory = TrackerCategoryCoreData(context: context)
+            newCategory.title = categoryTitle
+            return newCategory
+        }()
+        
+        trackerCoreData.category = targetCategoryCoreData
+        
+        try context.save()
+    }
+    
+    func getCategoryTitle(for trackerId: UUID) throws -> String? {
+        let fetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "id == %@", trackerId as CVarArg)
+        fetchRequest.fetchLimit = 1
+        
+        let trackers = try context.fetch(fetchRequest)
+        return trackers.first?.category?.title
+    }
+    
     func fetchCategoryCoreData(with title: String) throws -> TrackerCategoryCoreData? {
         let fetchRequest: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
         fetchRequest.predicate = NSPredicate(format: "title == %@", title)
@@ -119,8 +147,6 @@ final class TrackerCategoryStore: NSObject {
         let categories = try context.fetch(fetchRequest)
         return categories.first
     }
-    
-    
     
     // MARK: - Private Functions
     private func setupFetchedResultsController() throws {
@@ -145,7 +171,6 @@ final class TrackerCategoryStore: NSObject {
     private static func dummyContext() -> NSManagedObjectContext {
         let container = NSPersistentContainer(name: "Data")
         
-        // Используем in-memory store (данные не сохраняются)
         let description = NSPersistentStoreDescription()
         description.type = NSInMemoryStoreType
         container.persistentStoreDescriptions = [description]
