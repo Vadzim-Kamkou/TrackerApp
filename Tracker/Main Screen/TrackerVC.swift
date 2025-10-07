@@ -39,6 +39,7 @@ final class TrackerViewController: UIViewController {
     private var trackerSearchBar: UISearchBar?
     private let datePicker = UIDatePicker()
     
+    
     private lazy var collectionView: UICollectionView = {
         let layout = createLayout()
         let cv = UICollectionView(frame: .zero, collectionViewLayout: layout)
@@ -95,24 +96,55 @@ final class TrackerViewController: UIViewController {
         return "\(trackerId.uuidString)_\(formatter.string(from: dayStart))"
     }
     
-    private var filteredCategories: [TrackerCategory] {
-        let result: [TrackerCategory] = categories.compactMap { category in
-            let filteredTrackers = category.trackers.filter { tracker in
-                let shouldShowByDate = shouldShowTracker(tracker, for: currentDate)
-                let shouldShowByFilter = shouldShowTrackerByFilter(tracker)
-                return shouldShowByDate && shouldShowByFilter
-            }
-            
-            if filteredTrackers.isEmpty {
-                return nil
-            } else {
-                return TrackerCategory(
-                    title: category.title,
-                    trackers: filteredTrackers
-                )
+    private lazy var searchService: TrackerSearchServiceProtocol = {
+        let service = TrackerSearchService()
+        service.onSearchResultsUpdated = { [weak self] in
+            DispatchQueue.main.async {
+                self?.updateCollectionViewWithAnimation()
             }
         }
-        return result
+        return service
+    }()
+    
+    private var filteredCategories: [TrackerCategory] {
+        let searchResults = searchService.getSearchResults(from: categories, ignoreSchedule: searchService.isSearchActive)
+ 
+        if searchService.isSearchActive {
+            let result: [TrackerCategory] = searchResults.compactMap { category in
+                let filteredTrackers = category.trackers.filter { tracker in
+                    let shouldShowByFilter = shouldShowTrackerByFilter(tracker)
+                    return shouldShowByFilter
+                }
+                
+                if filteredTrackers.isEmpty {
+                    return nil
+                } else {
+                    return TrackerCategory(
+                        title: category.title,
+                        trackers: filteredTrackers
+                    )
+                }
+            }
+            return result
+        } else {
+            let result: [TrackerCategory] = searchResults.compactMap { category in
+                let filteredTrackers = category.trackers.filter { tracker in
+                    let shouldShowByDate = shouldShowTracker(tracker, for: currentDate)
+                    let shouldShowByFilter = shouldShowTrackerByFilter(tracker)
+                    return shouldShowByDate && shouldShowByFilter
+                }
+                
+                if filteredTrackers.isEmpty {
+                    return nil
+                } else {
+                    return TrackerCategory(
+                        title: category.title,
+                        trackers: filteredTrackers
+                    )
+                }
+            }
+            return result
+        }
     }
     
     // MARK: - Init
@@ -177,6 +209,7 @@ final class TrackerViewController: UIViewController {
         trackerSearchBar.translatesAutoresizingMaskIntoConstraints = false
         trackerSearchBar.searchBarStyle = .minimal
         trackerSearchBar.placeholder = NSLocalizedString("search", comment: "Search placeholder")
+        trackerSearchBar.delegate = self
         
         if let textField = trackerSearchBar.searchTextField as UITextField? {
             textField.textColor = UIColor(resource: .appTextPrimary)
@@ -388,13 +421,23 @@ final class TrackerViewController: UIViewController {
         guard !hasTrackers else { return }
         
         let message: String
-        if currentFilter.isActiveFilter {
-            message = NSLocalizedString("nothing_found", comment: "Nothing found message")
+        let image: UIImage
+        
+        if searchService.isSearchActive {
+            message = NSLocalizedString("nothing_found", comment: "")
+            image = UIImage(resource: .noSearchResult)
+        } else if currentFilter.isActiveFilter {
+            message = NSLocalizedString("nothing_found", comment: "")
+            image = UIImage(resource: .noSearchResult)
         } else {
-            message = NSLocalizedString("what_to_track", comment: "Empty state message")
+            message = NSLocalizedString("what_to_track", comment: "")
+            image = UIImage(resource: .noTrackers)
         }
         
         trackerLabel?.text = message
+        if let imageView = trackerView as? UIImageView {
+            imageView.image = image
+        }
     }
     
     private func animateTrackerAddition() {
@@ -427,6 +470,16 @@ final class TrackerViewController: UIViewController {
         return completedTrackers.filter { key in
             key.hasPrefix(tracker.id.uuidString)
         }.count
+    }
+    
+    private func updateCollectionViewWithAnimation() {
+        UIView.transition(with: collectionView,
+                         duration: 0.25,
+                         options: .transitionCrossDissolve) { [weak self] in
+            self?.collectionView.reloadData()
+        } completion: { [weak self] _ in
+            self?.updateViewVisibility()
+        }
     }
     
     // MARK: - Date Picker
@@ -596,7 +649,7 @@ extension TrackerViewController: TrackerCategoryStoreDelegate {
             let trackersCategory = try trackerCategoryStore.fetchTrackerCategory()
             
             self.categories = trackersCategory
-            
+            self.searchService.updateCategories(trackersCategory)
             
             DispatchQueue.main.async { [weak self] in
                 self?.collectionView.reloadData()
@@ -705,7 +758,6 @@ extension TrackerViewController: TrackerCellDelegate {
         }
     }
     
-    
     private func removeTrackerFromLocalData(_ tracker: Tracker) {
         for (categoryIndex, category) in categories.enumerated() {
             if let trackerIndex = category.trackers.firstIndex(where: { $0.id == tracker.id }) {
@@ -757,5 +809,22 @@ extension TrackerViewController: FilterViewControllerDelegate {
             self?.collectionView.reloadData()
             self?.updateViewVisibility()
         }
+    }
+}
+
+// MARK: - UISearchBarDelegate
+extension TrackerViewController: UISearchBarDelegate {
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        searchService.updateSearchText(searchText)
+    }
+    
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        searchBar.resignFirstResponder()
+    }
+    
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        searchBar.text = ""
+        searchBar.resignFirstResponder()
+        searchService.clearSearch()
     }
 }
